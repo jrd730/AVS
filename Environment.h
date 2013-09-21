@@ -1,0 +1,6 @@
+class Environment
+{
+	public:
+
+	private:
+};
