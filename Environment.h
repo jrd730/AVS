@@ -1,5 +1,10 @@
+#include <cstdlib>
+#include <vector>
+
 #include "QuadTree.h"
-#include "Lane.h"
+#include "Line.h"
+
+using namespace std;
 
 class Environment
 {
@@ -7,7 +12,14 @@ class Environment
 		Environment ();
 		~Environment ();
 
+		void insertLineSegment (vertex v);
+		void endLineSegment ();
+		void drawLineSegments ();
+
+		void insertPolygon (vertex v, int radius, int sides);
+
 	private:
 
-		QuadTree <Lane*>* lanes;
+		vector <Line*> lines;
+		Line* curLine;
 };
