@@ -26,4 +26,6 @@ private:
 	double cameraMaxRange;
   double cameraMinRange;
 	double cameraSpread;
+
+  vertex vertices[6];
 };
