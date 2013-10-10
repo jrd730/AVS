@@ -2,9 +2,10 @@
 Simulator places a simulated IGV in a generated environment, allowing it to move about freely. In the abscence of actual camera and GPS data, the simulator
 object feeds the IGV's sensors, so that the IGV can map out its environment.
 */
-
+#pragma once
 #include <algorithm>
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <GL/freeglut.h>
 #include <GL/freeglut_ext.h>
@@ -15,7 +16,7 @@ object feeds the IGV's sensors, so that the IGV can map out its environment.
 #include "IGV.h"
 
 enum INSERT_MODE{
-	INSERT_LINE, INSERT_BARREL
+	INSERT_LINE, INSERT_POLYGON
 };
 
 class Simulator
@@ -34,6 +35,9 @@ class Simulator
 		IGV igv;
 
 		static Simulator* callbackInstance;
+
+		void saveEnvironment ();
+    void loadEnvironment ();
 
 		static void motionWrapper (int, int);
 		static void mouseWrapper (int, int, int, int);
