@@ -24,13 +24,45 @@ IGV::~IGV ()
 	
 }
 
+void IGV::setCameraRange (double range)
+{
+  cameraMaxRange = range;
+  setSensorVertices ();
+}
+
+double IGV::getCameraRange ()
+{
+  return cameraMaxRange; 
+}
+
+void IGV::setCameraSpread (double spread)
+{
+  cameraSpread = spread;
+  setSensorVertices ();
+}
+
+double IGV::getCameraSpread ()
+{
+  return cameraSpread; 
+}
+
 void IGV::setSensorVertices ()
 {
-  sensorVertices.resize (3);
+  sensorVertices.clear ();
+  sensorVertices.resize (4);
 
   sensorVertices[0] = vertex (0, 0);
-  sensorVertices[1] = vertex ( cameraMaxRange * sin (cameraSpread/2), cameraMaxRange * cos (cameraSpread/2) );
-  sensorVertices[2] = vertex ( cameraMaxRange * -sin (cameraSpread/2), cameraMaxRange * cos (cameraSpread/2) );
+  sensorVertices[1] = 
+  vertex ( cameraMaxRange * sin ((cameraSpread/DEGREES_PER_RADIAN)/2.0), 
+            cameraMaxRange * cos ((cameraSpread/DEGREES_PER_RADIAN)/2.0) );
+  
+  sensorVertices[2] = 
+  vertex ( cameraMaxRange * -sin ((cameraSpread/DEGREES_PER_RADIAN)/2.0), 
+            cameraMaxRange * cos ((cameraSpread/DEGREES_PER_RADIAN)/2.0) );
+
+  // sensorVertices[1] = vertex (-1, 3);
+  // sensorVertices[2] = vertex (1, 3);
+  // sensorVertices[3] = vertex (0, 0);
 
 }
 
@@ -56,9 +88,9 @@ void IGV::draw ()
 
   // draw camera range
   glColor3f (0, 1.0, 0);
-  glBegin (GL_LINE_LOOP);
+  glBegin (GL_LINE_STRIP);
   for (unsigned i = 0; i < modelVertices.size(); ++i){
-    glVertex2f (modelVertices[i].x, modelVertices[i].y);
+    glVertex2f (sensorVertices[i].x, sensorVertices[i].y);
   }
   glEnd();
 

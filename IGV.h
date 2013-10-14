@@ -13,6 +13,12 @@ public:
 	IGV ();
 	~IGV ();
 
+  void setCameraRange (double range);
+  double getCameraRange ();
+
+  void setCameraSpread (double spread);
+  double getCameraSpread ();
+
 	void runProgram ();
 
   void draw ();

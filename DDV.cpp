@@ -1,7 +1,7 @@
 #include "DDV.h"
 
 DDV::DDV ():
-  position({0, 0}), rotation (270),
+  position({0, 0}), rotation (0),
   leftMotorSpeed (0), rightMotorSpeed (0)
 {
 

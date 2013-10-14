@@ -401,6 +401,22 @@ void Simulator::keyboard(unsigned char key, int x, int y)
       case 'f':
         findPoints ();
       break;
+
+      case 'Z':
+        igv.setCameraRange (igv.getCameraRange()+0.03);
+      break;
+
+      case 'z':
+        igv.setCameraRange (igv.getCameraRange()-0.03);
+      break;
+
+      case 'X':
+        igv.setCameraSpread (igv.getCameraSpread()+0.3);
+      break;
+
+      case 'x':
+        igv.setCameraSpread (igv.getCameraSpread()-0.3);
+      break;
   }
   glutPostRedisplay();
 }
