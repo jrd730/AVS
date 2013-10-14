@@ -27,12 +27,13 @@ class Environment
 		void drawLineQuadTree ();
 
 		void insertPolygon (vertex v, int radius, int sides);
+		
+		QuadTree <Line*>* lineMap;
 
 	private:
 
 		vector <Line*> lines;
 		vector <Line*> lineStarts;
-		QuadTree <Line*>* lineMap;
 
 		Line* curLine;
 };

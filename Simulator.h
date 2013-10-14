@@ -47,6 +47,8 @@ class Simulator
     void loadEnvironment ();
 
     void updateIGV ();
+    void setVisibleLines ();
+    //void updateCamera ();
 
     void special (int, int, int);
     void specialUp (int, int, int);
@@ -56,6 +58,7 @@ class Simulator
     void display();
     void reshape(int, int);
     void keyboard(unsigned char, int, int);
+    void keyboardUp(unsigned char, int, int);
 
     static void specialWrapper (int, int, int);
     static void specialUpWrapper (int, int, int);
@@ -65,4 +68,5 @@ class Simulator
     static void displayWrapper();
     static void reshapeWrapper(int, int);
     static void keyboardWrapper(unsigned char, int, int);
+    static void keyboardUpWrapper (unsigned char, int, int);
 };

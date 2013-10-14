@@ -19,3 +19,8 @@ void Line::setNextLine (Line* l){
 const Line* Line::getNextLine (){
 	return next;
 }
+
+void Line::draw ()
+{
+
+}

@@ -19,6 +19,8 @@ public:
   void setCameraSpread (double spread);
   double getCameraSpread ();
 
+  void setVisibleLines (vector <pair <vertex, Line*> >& lines);
+
 	void runProgram ();
 
   void draw ();
@@ -26,6 +28,8 @@ public:
 private:
 
   void setSensorVertices ();
+
+  vector <Line*> visibleLines;
 
 	NavMesh paths;
 	//QuadTree <int>* knownObstacles;

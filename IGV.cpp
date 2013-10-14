@@ -13,7 +13,7 @@ IGV::IGV ()
   modelVertices[5] = vertex ( -.325, -.325);
 
   cameraMinRange = 0.1;
-  cameraMaxRange = 3.0;
+  cameraMaxRange = 5.0;
   cameraSpread = 70.0;
 
   setSensorVertices ();
@@ -44,6 +44,16 @@ void IGV::setCameraSpread (double spread)
 double IGV::getCameraSpread ()
 {
   return cameraSpread; 
+}
+
+void IGV::setVisibleLines (vector <pair <vertex, Line*> >& lines)
+{
+  visibleLines.clear ();
+  visibleLines.resize(lines.size());
+
+  for (unsigned i = 0; i < lines.size(); ++i){
+    visibleLines[i] = lines[i].second;
+  }
 }
 
 void IGV::setSensorVertices ()
@@ -95,5 +105,13 @@ void IGV::draw ()
   glEnd();
 
   glPopMatrix ();
+
+  glColor3f (0, 1.0, 0);
+  glBegin (GL_LINES);
+  for (unsigned i = 0; i < visibleLines.size(); ++i){
+    glVertex2f (visibleLines[i]->start.x, visibleLines[i]->start.y);
+    glVertex2f (visibleLines[i]->next->start.x, visibleLines[i]->next->start.y);
+  }
+  glEnd();
 
 }

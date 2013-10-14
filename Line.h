@@ -3,6 +3,8 @@ Lines are painted white lines on the obstacle course. The IGV is not allowed to 
 */
 #pragma once
 #include <cstdlib>
+#include <GL/freeglut.h>
+#include <GL/freeglut_ext.h>
 #include "Vertex.h"
 
 class Line
@@ -14,6 +16,8 @@ public:
 
 	void setNextLine (Line* l);
 	const Line* getNextLine ();
+
+	void draw ();
 
 	vertex start;
 	Line* prev;

@@ -2,8 +2,8 @@
 
 static int height = 960;
 static int width = 960;
-static double ZOOM_INC = 32.0;
-static double PAN_INC = 32.0;
+static double ZOOM_INC = 128.0;
+static double PAN_INC = 128.0;
 
 static float graphXMin = -9;
 static float graphXMax = 9;
@@ -26,6 +26,8 @@ static vertex axis (128.0, 128.0);
 
 static vector <vertex> targetPoint;
 static vector <vertex> foundPoint;
+static vector <Line*> visibleLines;
+
 
 static int bucketSize = 1;
 static QuadTree <int>* qtree;
@@ -38,6 +40,11 @@ static int gui_window_id;
 
 bool keyMask [255];
 bool arrowKeys [4];
+
+bool drawIGV = false;
+bool drawEnv = true;
+bool drawSelectionBox = false;
+bool drawVisibleLines = true;
 
 Simulator* Simulator::callbackInstance (NULL);
 
@@ -98,6 +105,32 @@ static void editModeCallBack (int val)
 
 }
 
+static void updateCamera (int val)
+{
+  if (keyMask['w']){
+    pan (0, graphYRange/PAN_INC);
+  }
+  else if (keyMask['s']){
+    pan (0, -graphYRange/PAN_INC);
+  }
+  
+  if (keyMask['a']){
+    pan (-graphXRange/PAN_INC, 0);
+  }
+  else if (keyMask['d']){
+    pan (graphXRange/PAN_INC, 0);
+  }
+
+  if (keyMask['=']){
+    zoom ( graphXRange/ZOOM_INC, graphYRange/ZOOM_INC );
+  }
+  else if (keyMask['-']){
+    zoom ( -graphXRange/ZOOM_INC, -graphYRange/ZOOM_INC );
+  }
+
+  glutTimerFunc (40, updateCamera, 0);
+}
+
 Simulator::Simulator (int argc, char** argv)
 {
   qtree = new QuadTree <int> (origin, axis, 1, 26);
@@ -125,9 +158,12 @@ void Simulator::init (int argc, char** argv)
   glutMotionFunc (motionWrapper);
   glutMouseFunc (mouseWrapper);
   glutTimerFunc (16, timerWrapper, 0);
+  glutTimerFunc (40, updateCamera, 0);
+  //lutTimerFunc (250, setVisibleLines, 0);
   glutDisplayFunc(displayWrapper);
   glutReshapeFunc(reshapeWrapper);
   glutKeyboardFunc(keyboardWrapper);
+  glutKeyboardUpFunc(keyboardUpWrapper);
   glutSpecialFunc(specialWrapper);
   glutSpecialUpFunc(specialUpWrapper);
   fill(keyMask, keyMask+255, 0);
@@ -138,11 +174,17 @@ void Simulator::init (int argc, char** argv)
 void Simulator::initGUI ()
 {
   gui_window_id = glutCreateWindow("Simulator Parameters");
-  GLUI *glui = GLUI_Master.create_glui ( "Simulator Parameters", 0, 100, 100);
+  GLUI *glui = GLUI_Master.create_glui ( "Simulator Parameters", 0, 200, 200);
   glui->add_checkbox ("click me");
   glui->add_checkbox ("click me");
   glui->add_checkbox ("click me");
-
+  glui->add_button ("I\'m a button");
+  GLUI_Panel *panel = glui->add_panel ("Panel");
+  glui->add_button_to_panel (panel, "Buttons");
+  glui->add_column_to_panel (panel, true);
+  glui->add_button_to_panel (panel, "Are");
+  glui->add_column_to_panel (panel, true);
+  glui->add_button_to_panel (panel, "Cool");
   GLUI_RadioGroup* displayMode = glui->add_radiogroup (NULL, 0, editModeCallBack);
   //GLUI_RadioButton editMode = glui->add_radiobutton_to_group (displayMode, "edit map");
   //GLUI_RadioButton editMode (displayMode, "edit map");
@@ -180,28 +222,52 @@ void Simulator::loadEnvironment ()
 
 void Simulator::updateIGV ()
 {
-  // if (keyMask['w']){
-  //   igv.translate ({0, .1});
-  // }
-  // if (keyMask['a']){
-  //   igv.rotate (0.01);
-  // }
   if (arrowKeys[ARROW_UP]){
     igv.forward (0.1);
   }
-  
-  if (arrowKeys[ARROW_DOWN]){
+  else if (arrowKeys[ARROW_DOWN]){
     igv.forward (-0.1);
   }
 
   if (arrowKeys[ARROW_LEFT]){
-    igv.rotate (3.0);
+    igv.rotate (2.0);
+  }
+  else if (arrowKeys[ARROW_RIGHT]){
+    igv.rotate (-2.0);
   }
 
-  if (arrowKeys[ARROW_RIGHT]){
-    igv.rotate (-3.0);
+  if (keyMask['Z']){
+    igv.setCameraRange (igv.getCameraRange()+0.03);
+  }
+  else if (keyMask['z']){
+    igv.setCameraRange (igv.getCameraRange()-0.03);
   }
 
+  if (keyMask['X']){
+    igv.setCameraSpread (igv.getCameraSpread()+0.3);
+  }
+  else if (keyMask['x']){
+    igv.setCameraSpread (igv.getCameraSpread()-0.3);
+  }
+  
+  setVisibleLines ();
+}
+
+void Simulator::setVisibleLines ()
+{
+  vector <pair <vertex, Line*> > found;
+  found = env.lineMap->getObjectsInRegion (
+      {igv.position.x-igv.getCameraRange(), igv.position.y-igv.getCameraRange()}, 
+      {igv.position.x+igv.getCameraRange(), igv.position.y+igv.getCameraRange()});
+
+  visibleLines.clear();
+  visibleLines.resize(found.size());
+
+  for (int i=0; i < found.size(); ++i){
+      visibleLines[i] = found[i].second;
+  }
+  //glutTimerFunc (250, setVisibleLines, 0);
+  //igv.setVisibleLines (found);
 }
 
 void Simulator::motion (int x, int y)
@@ -264,8 +330,9 @@ void Simulator::mouse (int button, int state, int x, int y)
 void Simulator::timer (int val)
 {
   updateIGV ();
+  //updateCamera ();
   glutPostRedisplay ();
-	glutTimerFunc (40, timerWrapper, 0);
+	glutTimerFunc (18, timerWrapper, 0);
 }
 
 void Simulator::display()
@@ -286,26 +353,43 @@ void Simulator::display()
   //     }
   // glEnd();
 
-  glColor3f (0, 1, 0);
-    glBegin (GL_LINE_LOOP);
-        glVertex2f (squareCenter.x-squareRange.x, squareCenter.y-squareRange.y);
-        glVertex2f (squareCenter.x-squareRange.x, squareCenter.y+squareRange.y);
-        glVertex2f (squareCenter.x+squareRange.x, squareCenter.y+squareRange.y);
-        glVertex2f (squareCenter.x+squareRange.x, squareCenter.y-squareRange.y);
+  if (drawEnv){
+    env.drawLineSegments ();
+  }
+
+  if (drawSelectionBox){
+    glColor3f (0, 1, 0);
+      glBegin (GL_LINE_LOOP);
+          glVertex2f (squareCenter.x-squareRange.x, squareCenter.y-squareRange.y);
+          glVertex2f (squareCenter.x-squareRange.x, squareCenter.y+squareRange.y);
+          glVertex2f (squareCenter.x+squareRange.x, squareCenter.y+squareRange.y);
+          glVertex2f (squareCenter.x+squareRange.x, squareCenter.y-squareRange.y);
+      glEnd();
+
+    // found points 
+    glColor3f (0, 1, 0);
+    glPointSize (3.0);
+    glBegin (GL_POINTS);
+        for (unsigned i=0; i<foundPoint.size(); ++i){
+            glVertex2f (foundPoint[i].x, foundPoint[i].y);
+        }
     glEnd();
+  }
 
-  env.drawLineSegments ();
-
-  // found points 
-  glColor3f (0, 1, 0);
-  glPointSize (3.0);
-  glBegin (GL_POINTS);
-      for (unsigned i=0; i<foundPoint.size(); ++i){
-          glVertex2f (foundPoint[i].x, foundPoint[i].y);
-      }
+  if (drawVisibleLines){
+    glColor3f (0, 1, 0);
+      glBegin (GL_LINES);
+      for (int i=0; i < visibleLines.size(); ++i){
+        if (visibleLines[i]->next != NULL){
+          glVertex2f (visibleLines[i]->start.x, visibleLines[i]->start.y);
+          glVertex2f (visibleLines[i]->next->start.x, visibleLines[i]->next->start.y);}
+  }
   glEnd();
+  }
 
-  igv.draw();
+  if (drawIGV){
+    igv.draw();
+  }
 
   glutSwapBuffers();
 }
@@ -326,13 +410,8 @@ void Simulator::reshape(int w, int h)
 void Simulator::keyboard(unsigned char key, int x, int y)
 {
   //cout << key << " pressed\n";
-  keyMask[key] = !keyMask[key];
+  keyMask[key] = true;
 	switch (key){
-      case 'c':
-      case 'C':
-          
-      break;
-
       case 'k':
           drawQuadTree = !drawQuadTree;
       break;
@@ -347,78 +426,43 @@ void Simulator::keyboard(unsigned char key, int x, int y)
         loadEnvironment ();
       break;     
 
-      case 'a':
-      case 'A':
-          pan (-graphXRange/PAN_INC, 0);
+      case 'i':
+      case 'I':
+          drawIGV = !drawIGV;
       break;
 
-      case 'd':
-      case 'D':
-          pan (graphXRange/PAN_INC, 0);
+      case 'u':
+      case 'U':
+          drawEnv = !drawEnv;
+      break;
+
+      case 'j':
+      case 'J':
+        drawSelectionBox = !drawSelectionBox;
+      break;
+
+      case 'h':
+      case 'H':
+        drawVisibleLines = !drawVisibleLines;
       break; 
-
-      case 'w':
-      case 'W':
-          pan (0, graphYRange/PAN_INC);
-      break; 
-
-      case 's':
-      case 'S':
-          pan (0, -graphYRange/PAN_INC);
-      break;
-
-      case 'r':
-      case 'R':
-          
-      break;
-
-      case 'b':
-          
-      break;
-
-      case 'B':
-          
-      break;
 
       case '~':
         env.destroy();
         targetPoint.clear();
         delete qtree;
         qtree = new QuadTree <int> (origin, axis, 1, 16);
-
-      break;
-
-      case '+':
-      case '=':
-          zoom ( graphXRange/ZOOM_INC, graphYRange/ZOOM_INC );
-      break; 
-
-      case '-':
-      case '_':
-          zoom ( -graphXRange/ZOOM_INC, -graphYRange/ZOOM_INC );
       break;
 
       case 'f':
         findPoints ();
       break;
-
-      case 'Z':
-        igv.setCameraRange (igv.getCameraRange()+0.03);
-      break;
-
-      case 'z':
-        igv.setCameraRange (igv.getCameraRange()-0.03);
-      break;
-
-      case 'X':
-        igv.setCameraSpread (igv.getCameraSpread()+0.3);
-      break;
-
-      case 'x':
-        igv.setCameraSpread (igv.getCameraSpread()-0.3);
-      break;
   }
   glutPostRedisplay();
+}
+
+void Simulator::keyboardUp(unsigned char key, int x, int y)
+{
+  keyMask[key] = false;
 }
 
 void Simulator::special (int key, int x, int y)
@@ -493,6 +537,10 @@ void Simulator::reshapeWrapper(int width, int height){
 
 void Simulator::keyboardWrapper(unsigned char key, int x, int y){
 	callbackInstance->keyboard(key, x, y);
+}
+
+void Simulator::keyboardUpWrapper (unsigned char key, int x, int y){
+  callbackInstance->keyboardUp (key, x, y);
 }
 
 void Simulator::run ()

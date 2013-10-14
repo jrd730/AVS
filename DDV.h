@@ -23,9 +23,6 @@ public:
 	void setPosition (vertex pos);
 
 	void reposition (double dt);
-
-protected:
-
 	
 	vertex position;
 	double rotation; // zero is facing north
