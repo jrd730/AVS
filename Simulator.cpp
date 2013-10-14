@@ -33,7 +33,11 @@ static bool drawQuadTree = 0;
 
 static double minLineGap = 0.1;
 
+static int gl_window_id;
+static int gui_window_id;
+
 bool keyMask [255];
+bool arrowKeys [4];
 
 Simulator* Simulator::callbackInstance (NULL);
 
@@ -89,6 +93,11 @@ static void findPoints ()
   }
 }
 
+static void editModeCallBack (int val)
+{
+
+}
+
 Simulator::Simulator (int argc, char** argv)
 {
   qtree = new QuadTree <int> (origin, axis, 1, 26);
@@ -107,7 +116,7 @@ void Simulator::init (int argc, char** argv)
   glutInitWindowSize (width, height);
   //glutInitContextVersion( 3, 2 );
   //glutInitContextProfile( GLUT_CORE_PROFILE );
-  glutCreateWindow ("Autonomous Vehicle Simulator");
+  gl_window_id = glutCreateWindow ("Autonomous Vehicle Simulator");
   //glutSetWindowTitle("");
   //glutSetIconTitle("");
   glEnable( GL_DEPTH_TEST );
@@ -122,6 +131,22 @@ void Simulator::init (int argc, char** argv)
   glutSpecialFunc(specialWrapper);
   glutSpecialUpFunc(specialUpWrapper);
   fill(keyMask, keyMask+255, 0);
+
+  initGUI ();
+}
+
+void Simulator::initGUI ()
+{
+  gui_window_id = glutCreateWindow("Simulator Parameters");
+  GLUI *glui = GLUI_Master.create_glui ( "Simulator Parameters", 0, 100, 100);
+  glui->add_checkbox ("click me");
+  glui->add_checkbox ("click me");
+  glui->add_checkbox ("click me");
+
+  GLUI_RadioGroup* displayMode = glui->add_radiogroup (NULL, 0, editModeCallBack);
+  //GLUI_RadioButton editMode = glui->add_radiobutton_to_group (displayMode, "edit map");
+  //GLUI_RadioButton editMode (displayMode, "edit map");
+  //GLUI_RadioButton 
 }
 
 void Simulator::saveEnvironment ()
@@ -151,6 +176,32 @@ void Simulator::loadEnvironment ()
     }
     fin >> next_token;
   }
+}
+
+void Simulator::updateIGV ()
+{
+  // if (keyMask['w']){
+  //   igv.translate ({0, .1});
+  // }
+  // if (keyMask['a']){
+  //   igv.rotate (0.01);
+  // }
+  if (arrowKeys[ARROW_UP]){
+    igv.forward (0.1);
+  }
+  
+  if (arrowKeys[ARROW_DOWN]){
+    igv.forward (-0.1);
+  }
+
+  if (arrowKeys[ARROW_LEFT]){
+    igv.rotate (3.0);
+  }
+
+  if (arrowKeys[ARROW_RIGHT]){
+    igv.rotate (-3.0);
+  }
+
 }
 
 void Simulator::motion (int x, int y)
@@ -212,6 +263,7 @@ void Simulator::mouse (int button, int state, int x, int y)
 
 void Simulator::timer (int val)
 {
+  updateIGV ();
   glutPostRedisplay ();
 	glutTimerFunc (40, timerWrapper, 0);
 }
@@ -356,14 +408,43 @@ void Simulator::keyboard(unsigned char key, int x, int y)
 void Simulator::special (int key, int x, int y)
 {
   switch (key){
-    case GLUT_UP:
+    case GLUT_KEY_UP:
+      arrowKeys[ARROW_UP] = true;
+    break;
+
+    case GLUT_KEY_DOWN:
+      arrowKeys[ARROW_DOWN] = true;
+    break;
+
+    case GLUT_KEY_LEFT:
+      arrowKeys[ARROW_LEFT] = true;
+    break;
+
+    case GLUT_KEY_RIGHT:
+      arrowKeys[ARROW_RIGHT] = true;
     break;
   }
 }
 
 void Simulator::specialUp (int key, int x, int y)
 {
+  switch (key){
+    case GLUT_KEY_UP:
+      arrowKeys[ARROW_UP] = false;
+    break;
 
+    case GLUT_KEY_DOWN:
+      arrowKeys[ARROW_DOWN] = false;
+    break;
+
+    case GLUT_KEY_LEFT:
+      arrowKeys[ARROW_LEFT] = false;
+    break;
+
+    case GLUT_KEY_RIGHT:
+      arrowKeys[ARROW_RIGHT] = false;
+    break;
+  }
 }
 
 void Simulator::specialWrapper (int key, int x, int y){

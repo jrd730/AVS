@@ -6,8 +6,9 @@ A differential drive vehicle is a vehicle with independent motion of its left an
 the ratio of angular velocities of each wheel. 
 */
 #pragma once
+#include <cmath>
 #include "Vertex.h"
-
+#define DEGREES_PER_RADIAN 57.2957795
 class DDV
 {
 public:
@@ -17,12 +18,13 @@ public:
 	void rotate (double amount);
 	void setRotation (double r);
 
+	void forward (double amount);
 	void translate  (vertex amount);
 	void setPosition (vertex pos);
 
 	void reposition (double dt);
 
-private:
+protected:
 
 	
 	vertex position;

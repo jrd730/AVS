@@ -1,7 +1,7 @@
 #include "DDV.h"
 
 DDV::DDV ():
-  position({0, 0}), rotation (0),
+  position({0, 0}), rotation (270),
   leftMotorSpeed (0), rightMotorSpeed (0)
 {
 
@@ -25,6 +25,12 @@ void DDV::rotate (double amount)
 void DDV::setRotation (double r)
 {
   rotation = r;
+}
+
+void DDV::forward (double amount)
+{
+  position.x += amount * -sin (rotation/DEGREES_PER_RADIAN);
+  position.y += amount * cos (rotation/DEGREES_PER_RADIAN);
 }
 
 void DDV::translate  (vertex amount)

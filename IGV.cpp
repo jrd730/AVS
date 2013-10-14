@@ -1,5 +1,7 @@
 #include "IGV.h"
 
+static double base_speed = .01;
+
 IGV::IGV ()
 {
   modelVertices.resize (6);
@@ -23,7 +25,7 @@ IGV::~IGV ()
 void IGV::setSensorVertices ()
 {
   sensorVertices.resize (3);
-  
+
 }
 
 void IGV::runProgram ()
@@ -33,8 +35,13 @@ void IGV::runProgram ()
 
 void IGV::draw ()
 {
+  glPushMatrix ();
+
+  glTranslatef (position.x, position.y, 0);
+  glRotatef (rotation, 0, 0, 1);
+
   // draw outline of robot chassis
-  glColor3f (1.0, 1.0, 1.0);
+  glColor3f (.5, 1.0, 1.0);
   glBegin (GL_POLYGON);
   for (unsigned i = 0; i < modelVertices.size(); ++i){
     glVertex2f (modelVertices[i].x, modelVertices[i].y);
@@ -48,5 +55,7 @@ void IGV::draw ()
     glVertex2f (modelVertices[i].x, modelVertices[i].y);
   }
   glEnd();
+
+  glPopMatrix ();
 
 }
