@@ -19,13 +19,17 @@ public:
 
 private:
 
+  void setSensorVertices ();
+
 	NavMesh paths;
 	//QuadTree <int>* knownObstacles;
   Environment  env;
 
-	double cameraMaxRange;
-  double cameraMinRange;
-	double cameraSpread;
+	double cameraMaxRange; // meters from center
+  double cameraMinRange; // meters from center
+	double cameraSpread; // degrees
 
-  vertex vertices[6];
+  vector <vertex> modelVertices; //meters from center
+  vector <vertex> sensorVertices; //meters from center
+
 };

@@ -14,16 +14,26 @@ public:
 	DDV();
 	~DDV();
 
+	void rotate (double amount);
+	void setRotation (double r);
+
+	void translate  (vertex amount);
+	void setPosition (vertex pos);
+
 	void reposition (double dt);
 
 private:
 
 	
 	vertex position;
-	double direction;
+	double rotation; // zero is facing north
 	double leftMotorSpeed;
 	double rightMotorSpeed;
 
+	// these variables can be used in conjunction with 
+	// left and right motor speeds to come up with an 
+	// estimate of the bot's updated position and 
+	// direction after an indicated time slice
 	double axleWidth;
 	double wheelRadius;
 	double wheelPerimeter;

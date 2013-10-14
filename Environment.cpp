@@ -85,7 +85,7 @@ void Environment::printLineSegments (ostream& os)
 
 void Environment::drawLineSegments ()
 {
-	glColor3f (0, 0, 1);
+	glColor3f (1, 1, 1);
 	glBegin (GL_LINES);
 	for (int i=0; i < lines.size(); ++i){
 		if (lines[i]->next != NULL){

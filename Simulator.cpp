@@ -1,7 +1,7 @@
 #include "Simulator.h"
 
-static int height = 480;
-static int width = 480;
+static int height = 960;
+static int width = 960;
 static double ZOOM_INC = 32.0;
 static double PAN_INC = 32.0;
 
@@ -19,7 +19,7 @@ static bool leftMouseDown = 0;
 static bool rightMouseDown = 0;
 
 static vertex squareCenter (0, 0);
-static vertex squareRange (10, 10);
+static vertex squareRange (4, 4);
 
 static vertex origin (0, 0);
 static vertex axis (128.0, 128.0);
@@ -29,7 +29,7 @@ static vector <vertex> foundPoint;
 
 static int bucketSize = 1;
 static QuadTree <int>* qtree;
-static bool drawQuadTree = 1;
+static bool drawQuadTree = 0;
 
 static double minLineGap = 0.1;
 
@@ -91,7 +91,7 @@ static void findPoints ()
 
 Simulator::Simulator (int argc, char** argv)
 {
-  qtree = new QuadTree <int> (origin, axis, 1, 16);
+  qtree = new QuadTree <int> (origin, axis, 1, 26);
 	init (argc, argv);
 }
 
@@ -119,7 +119,8 @@ void Simulator::init (int argc, char** argv)
   glutDisplayFunc(displayWrapper);
   glutReshapeFunc(reshapeWrapper);
   glutKeyboardFunc(keyboardWrapper);
-
+  glutSpecialFunc(specialWrapper);
+  glutSpecialUpFunc(specialUpWrapper);
   fill(keyMask, keyMask+255, 0);
 }
 
@@ -142,6 +143,8 @@ void Simulator::loadEnvironment ()
         fin >> y;
         vertex v (atof (x.c_str()), atof (y.c_str()));
         env.insertLineSegment(v);
+        targetPoint.push_back (v);
+        qtree->insert (v, 1);
         fin >> x;
       }
       env.endLineSegment();
@@ -218,7 +221,7 @@ void Simulator::display()
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
   if (drawQuadTree){
-    glColor3f (1, 1, 1);
+    glColor3f (0, 0, 1);
     //qtree->draw(); 
     env.drawLineQuadTree ();
   }
@@ -328,6 +331,8 @@ void Simulator::keyboard(unsigned char key, int x, int y)
       case '~':
         env.destroy();
         targetPoint.clear();
+        delete qtree;
+        qtree = new QuadTree <int> (origin, axis, 1, 16);
 
       break;
 
@@ -346,6 +351,27 @@ void Simulator::keyboard(unsigned char key, int x, int y)
       break;
   }
   glutPostRedisplay();
+}
+
+void Simulator::special (int key, int x, int y)
+{
+  switch (key){
+    case GLUT_UP:
+    break;
+  }
+}
+
+void Simulator::specialUp (int key, int x, int y)
+{
+
+}
+
+void Simulator::specialWrapper (int key, int x, int y){
+  callbackInstance->special (key, x, y);
+}
+
+void Simulator::specialUpWrapper (int key, int x, int y){
+  callbackInstance->specialUp (key, x, y);
 }
 
 void Simulator::motionWrapper (int x, int y){

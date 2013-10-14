@@ -7,6 +7,7 @@ object feeds the IGV's sensors, so that the IGV can map out its environment.
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <GL/glui.h>
 #include <GL/freeglut.h>
 #include <GL/freeglut_ext.h>
 #include <sstream>
@@ -39,6 +40,8 @@ class Simulator
 		void saveEnvironment ();
     void loadEnvironment ();
 
+    static void specialWrapper (int, int, int);
+    static void specialUpWrapper (int, int, int);
 		static void motionWrapper (int, int);
 		static void mouseWrapper (int, int, int, int);
 		static void timerWrapper(int);
@@ -46,6 +49,8 @@ class Simulator
     static void reshapeWrapper(int, int);
     static void keyboardWrapper(unsigned char, int, int);
 
+    void special (int, int, int);
+    void specialUp (int, int, int);
     void motion (int, int);
     void mouse (int, int, int, int);
     void timer (int);
