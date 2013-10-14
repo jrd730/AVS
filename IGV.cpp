@@ -15,6 +15,8 @@ IGV::IGV ()
   cameraMinRange = 0.1;
   cameraMaxRange = 3.0;
   cameraSpread = 70.0;
+
+  setSensorVertices ();
 }
 
 IGV::~IGV ()
@@ -25,6 +27,10 @@ IGV::~IGV ()
 void IGV::setSensorVertices ()
 {
   sensorVertices.resize (3);
+
+  sensorVertices[0] = vertex (0, 0);
+  sensorVertices[1] = vertex ( cameraMaxRange * sin (cameraSpread/2), cameraMaxRange * cos (cameraSpread/2) );
+  sensorVertices[2] = vertex ( cameraMaxRange * -sin (cameraSpread/2), cameraMaxRange * cos (cameraSpread/2) );
 
 }
 
