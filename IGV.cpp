@@ -106,12 +106,12 @@ void IGV::draw ()
 
   glPopMatrix ();
 
-  glColor3f (0, 1.0, 0);
-  glBegin (GL_LINES);
-  for (unsigned i = 0; i < visibleLines.size(); ++i){
-    glVertex2f (visibleLines[i]->start.x, visibleLines[i]->start.y);
-    glVertex2f (visibleLines[i]->next->start.x, visibleLines[i]->next->start.y);
-  }
-  glEnd();
+  // glColor3f (0, 1.0, 0);
+  // glBegin (GL_LINES);
+  // for (unsigned i = 0; i < visibleLines.size(); ++i){
+  //   glVertex2f (visibleLines[i]->start.x, visibleLines[i]->start.y);
+  //   glVertex2f (visibleLines[i]->next->start.x, visibleLines[i]->next->start.y);
+  // }
+  // glEnd();
 
 }

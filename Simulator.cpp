@@ -173,7 +173,7 @@ void Simulator::init (int argc, char** argv)
 
 void Simulator::initGUI ()
 {
-  gui_window_id = glutCreateWindow("Simulator Parameters");
+  //gui_window_id = glutCreateWindow("Simulator Parameters");
   GLUI *glui = GLUI_Master.create_glui ( "Simulator Parameters", 0, 200, 200);
   glui->add_checkbox ("click me");
   glui->add_checkbox ("click me");

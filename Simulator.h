@@ -62,9 +62,9 @@ class Simulator
 
     static void specialWrapper (int, int, int);
     static void specialUpWrapper (int, int, int);
-		static void motionWrapper (int, int);
-		static void mouseWrapper (int, int, int, int);
-		static void timerWrapper(int);
+	static void motionWrapper (int, int);
+	static void mouseWrapper (int, int, int, int);
+	static void timerWrapper(int);
     static void displayWrapper();
     static void reshapeWrapper(int, int);
     static void keyboardWrapper(unsigned char, int, int);
