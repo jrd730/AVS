@@ -59,7 +59,7 @@ void IGV::setVisibleLines (vector <pair <vertex, Line*> >& lines)
 void IGV::setSensorVertices ()
 {
   sensorVertices.clear ();
-  sensorVertices.resize (4);
+  sensorVertices.resize (3);
 
   sensorVertices[0] = vertex (0, 0);
   sensorVertices[1] = 
@@ -98,8 +98,8 @@ void IGV::draw ()
 
   // draw camera range
   glColor3f (0, 1.0, 0);
-  glBegin (GL_LINE_STRIP);
-  for (unsigned i = 0; i < modelVertices.size(); ++i){
+  glBegin (GL_LINE_LOOP);
+  for (unsigned i = 0; i < sensorVertices.size(); ++i){
     glVertex2f (sensorVertices[i].x, sensorVertices[i].y);
   }
   glEnd();

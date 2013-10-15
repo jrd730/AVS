@@ -358,13 +358,13 @@ void Simulator::display()
   }
 
   if (drawSelectionBox){
-    glColor3f (0, 1, 0);
-      glBegin (GL_LINE_LOOP);
-          glVertex2f (squareCenter.x-squareRange.x, squareCenter.y-squareRange.y);
-          glVertex2f (squareCenter.x-squareRange.x, squareCenter.y+squareRange.y);
-          glVertex2f (squareCenter.x+squareRange.x, squareCenter.y+squareRange.y);
-          glVertex2f (squareCenter.x+squareRange.x, squareCenter.y-squareRange.y);
-      glEnd();
+    // glColor3f (0, 1, 0);
+    //   glBegin (GL_LINE_LOOP);
+    //       glVertex2f (squareCenter.x-squareRange.x, squareCenter.y-squareRange.y);
+    //       glVertex2f (squareCenter.x-squareRange.x, squareCenter.y+squareRange.y);
+    //       glVertex2f (squareCenter.x+squareRange.x, squareCenter.y+squareRange.y);
+    //       glVertex2f (squareCenter.x+squareRange.x, squareCenter.y-squareRange.y);
+    //   glEnd();
 
     // found points 
     glColor3f (0, 1, 0);
@@ -383,8 +383,8 @@ void Simulator::display()
         if (visibleLines[i]->next != NULL){
           glVertex2f (visibleLines[i]->start.x, visibleLines[i]->start.y);
           glVertex2f (visibleLines[i]->next->start.x, visibleLines[i]->next->start.y);}
-  }
-  glEnd();
+      }
+      glEnd();
   }
 
   if (drawIGV){
