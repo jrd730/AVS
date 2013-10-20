@@ -27,10 +27,12 @@ static vertex axis (128.0, 128.0);
 static vector <vertex> targetPoint;
 static vector <vertex> foundPoint;
 static vector <Line*> visibleLines;
+static vector <vertex> visiblePoints;
+
 
 
 static int bucketSize = 1;
-static QuadTree <int>* qtree;
+//static QuadTree <int>* qtree;
 static bool drawQuadTree = 0;
 
 static double minLineGap = 0.1;
@@ -85,20 +87,20 @@ static void zoom (double xAmount, double yAmount)
     glLoadIdentity();   
 }
 
-static void findPoints ()
-{
-  vector <pair <vertex, int> > found;
-  found = qtree->getObjectsInRegion (
-      {squareCenter.x-squareRange.x, squareCenter.y-squareRange.y}, 
-      {squareCenter.x+squareRange.x, squareCenter.y+squareRange.y});
+// static void findPoints ()
+// {
+//   vector <pair <vertex, int> > found;
+//   found = qtree->getObjectsInRegion (
+//       {squareCenter.x-squareRange.x, squareCenter.y-squareRange.y}, 
+//       {squareCenter.x+squareRange.x, squareCenter.y+squareRange.y});
 
-  foundPoint.clear();
-  foundPoint.resize(found.size());
+//   foundPoint.clear();
+//   foundPoint.resize(found.size());
 
-  for (int i=0; i < found.size(); ++i){
-      foundPoint[i] = found[i].first;
-  }
-}
+//   for (int i=0; i < found.size(); ++i){
+//       foundPoint[i] = found[i].first;
+//   }
+// }
 
 static void editModeCallBack (int val)
 {
@@ -133,7 +135,7 @@ static void updateCamera (int val)
 
 Simulator::Simulator (int argc, char** argv)
 {
-  qtree = new QuadTree <int> (origin, axis, 1, 26);
+  //qtree = new QuadTree <int> (origin, axis, 1, 26);
 	init (argc, argv);
 }
 
@@ -159,7 +161,6 @@ void Simulator::init (int argc, char** argv)
   glutMouseFunc (mouseWrapper);
   glutTimerFunc (16, timerWrapper, 0);
   glutTimerFunc (40, updateCamera, 0);
-  //lutTimerFunc (250, setVisibleLines, 0);
   glutDisplayFunc(displayWrapper);
   glutReshapeFunc(reshapeWrapper);
   glutKeyboardFunc(keyboardWrapper);
@@ -211,7 +212,6 @@ void Simulator::loadEnvironment ()
         vertex v (atof (x.c_str()), atof (y.c_str()));
         env.insertLineSegment(v);
         targetPoint.push_back (v);
-        qtree->insert (v, 1);
         fin >> x;
       }
       env.endLineSegment();
@@ -275,14 +275,14 @@ void Simulator::motion (int x, int y)
   vertex newpoint ( x*pixToXCoord + graphXMin, -y*pixToYCoord + graphYMax);
 
   if (leftMouseDown){
-      if (env.insertEvenSpacedLine (newpoint, minLineGap)){
+      if (env.insertEvenSpacedLine (newpoint, minLineGap))
+      {
         targetPoint.push_back(newpoint);
-        qtree->insert (newpoint, 1);  
       }
     }
     else if (rightMouseDown){
       squareCenter = newpoint;
-      findPoints ();
+      //findPoints ();
     }
     
     glutPostRedisplay();
@@ -298,9 +298,7 @@ void Simulator::mouse (int button, int state, int x, int y)
           case GLUT_DOWN:
               leftMouseDown = 1;
               targetPoint.push_back(newpoint);
-              qtree->insert (newpoint, 1);
-
-              env.insertEvenSpacedLine (newpoint, 1.0);
+              env.insertLineSegment (newpoint);
           break;
 
           case GLUT_UP:
@@ -314,11 +312,11 @@ void Simulator::mouse (int button, int state, int x, int y)
           case GLUT_DOWN:
             rightMouseDown = 1;
             squareCenter = newpoint;
-            findPoints ();
+            //findPoints ();
           break;
 
           case GLUT_UP:
-              rightMouseDown = 0;
+            rightMouseDown = 0;
           break;
         }
       break;
@@ -341,7 +339,6 @@ void Simulator::display()
 
   if (drawQuadTree){
     glColor3f (0, 0, 1);
-    //qtree->draw(); 
     env.drawLineQuadTree ();
   }
 
@@ -358,13 +355,13 @@ void Simulator::display()
   }
 
   if (drawSelectionBox){
-    // glColor3f (0, 1, 0);
-    //   glBegin (GL_LINE_LOOP);
-    //       glVertex2f (squareCenter.x-squareRange.x, squareCenter.y-squareRange.y);
-    //       glVertex2f (squareCenter.x-squareRange.x, squareCenter.y+squareRange.y);
-    //       glVertex2f (squareCenter.x+squareRange.x, squareCenter.y+squareRange.y);
-    //       glVertex2f (squareCenter.x+squareRange.x, squareCenter.y-squareRange.y);
-    //   glEnd();
+    glColor3f (0, 1, 0);
+      glBegin (GL_LINE_LOOP);
+          glVertex2f (squareCenter.x-squareRange.x, squareCenter.y-squareRange.y);
+          glVertex2f (squareCenter.x-squareRange.x, squareCenter.y+squareRange.y);
+          glVertex2f (squareCenter.x+squareRange.x, squareCenter.y+squareRange.y);
+          glVertex2f (squareCenter.x+squareRange.x, squareCenter.y-squareRange.y);
+      glEnd();
 
     // found points 
     glColor3f (0, 1, 0);
@@ -380,9 +377,11 @@ void Simulator::display()
     glColor3f (0, 1, 0);
       glBegin (GL_LINES);
       for (int i=0; i < visibleLines.size(); ++i){
-        if (visibleLines[i]->next != NULL){
+        if (visibleLines[i]->next != NULL)
+        {
           glVertex2f (visibleLines[i]->start.x, visibleLines[i]->start.y);
-          glVertex2f (visibleLines[i]->next->start.x, visibleLines[i]->next->start.y);}
+          glVertex2f (visibleLines[i]->next->start.x, visibleLines[i]->next->start.y);
+        }
       }
       glEnd();
   }
@@ -449,12 +448,10 @@ void Simulator::keyboard(unsigned char key, int x, int y)
       case '~':
         env.destroy();
         targetPoint.clear();
-        delete qtree;
-        qtree = new QuadTree <int> (origin, axis, 1, 16);
       break;
 
       case 'f':
-        findPoints ();
+        //findPoints ();
       break;
   }
   glutPostRedisplay();

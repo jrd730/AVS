@@ -6,7 +6,7 @@ static vertex axis (128.0, 128.0);
 Environment::Environment ()
 {
 	curLine = NULL;
-	lineMap = new QuadTree <Line*> (origin, axis, 1, 16);
+	lineMap = new QuadTree <Line*> (origin, axis, 1, 26);
 }
 
 Environment::~Environment ()
@@ -17,7 +17,7 @@ Environment::~Environment ()
 void Environment::destroy ()
 {
 	delete lineMap;
-	lineMap = new QuadTree <Line*> (origin, axis, 1, 16);
+	lineMap = new QuadTree <Line*> (origin, axis, 1, 26);
 
 	for (int i=0; i < lines.size(); ++i){
 		delete lines[i];
@@ -48,7 +48,23 @@ void Environment::insertLineSegment (vertex v)
 bool Environment::insertEvenSpacedLine (vertex v, double spacing)
 {
 	if (curLine){
-		if (curLine->start.distance (v) >= spacing){
+		float dist = curLine->start.distance (v);
+		if (dist >= spacing){
+			// get vector from start to end points
+			vertex vec ((v.x-curLine->start.x), (v.y-curLine->start.y));
+			
+			// unitize vector and make its distance equal to min line spacing
+			vec = (vec*spacing)/dist;
+
+			// create in between points to fill in the gap
+			vertex tween (curLine->start.x+vec.x, curLine->start.y+vec.y);
+			float coveredDistance = 0;
+			do{
+				insertLineSegment (tween);
+				tween = vertex (tween.x+vec.x, tween.y+vec.y);
+				coveredDistance += spacing;
+			}while (coveredDistance < dist);
+			
 			insertLineSegment (v);
 		}
 		else{
