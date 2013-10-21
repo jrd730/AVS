@@ -24,6 +24,10 @@ public:
 	void runProgram ();
 
   void draw ();
+	
+  double cameraMaxRange; // meters from center
+  double cameraMinRange; // meters from center
+	double cameraSpread; // degrees
 
 private:
 
@@ -31,13 +35,10 @@ private:
 
   vector <Line*> visibleLines;
 
-	NavMesh paths;
-	//QuadTree <int>* knownObstacles;
+  NavMesh paths;
+  //QuadTree <int>* knownObstacles;
   Environment  env;
 
-	double cameraMaxRange; // meters from center
-  double cameraMinRange; // meters from center
-	double cameraSpread; // degrees
 
   vector <vertex> modelVertices; //meters from center
   vector <vertex> sensorVertices; //meters from center

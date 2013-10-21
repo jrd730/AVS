@@ -29,8 +29,6 @@ static vector <vertex> foundPoint;
 static vector <Line*> visibleLines;
 static vector <vertex> visiblePoints;
 
-
-
 static int bucketSize = 1;
 //static QuadTree <int>* qtree;
 static bool drawQuadTree = 0;
@@ -130,7 +128,7 @@ static void updateCamera (int val)
     zoom ( -graphXRange/ZOOM_INC, -graphYRange/ZOOM_INC );
   }
 
-  glutTimerFunc (40, updateCamera, 0);
+  //glutTimerFunc (40, updateCamera, 0);
 }
 
 Simulator::Simulator (int argc, char** argv)
@@ -160,7 +158,7 @@ void Simulator::init (int argc, char** argv)
   glutMotionFunc (motionWrapper);
   glutMouseFunc (mouseWrapper);
   glutTimerFunc (16, timerWrapper, 0);
-  glutTimerFunc (40, updateCamera, 0);
+  //glutTimerFunc (40, updateCamera, 0);
   glutDisplayFunc(displayWrapper);
   glutReshapeFunc(reshapeWrapper);
   glutKeyboardFunc(keyboardWrapper);
@@ -261,13 +259,49 @@ void Simulator::setVisibleLines ()
       {igv.position.x+igv.getCameraRange(), igv.position.y+igv.getCameraRange()});
 
   visibleLines.clear();
-  visibleLines.resize(found.size());
+  //visibleLines.resize(found.size());
 
   for (int i=0; i < found.size(); ++i){
-      visibleLines[i] = found[i].second;
+    if ( pointInCircleSlice (
+        found[i].first, igv.position, 
+        igv.cameraMinRange, igv.cameraMaxRange, 
+        igv.rotation-(igv.cameraSpread/2.0),
+        igv.rotation+(igv.cameraSpread/2.0) )
+      ){
+      visibleLines.push_back( found[i].second ) ;
+    }
   }
   //glutTimerFunc (250, setVisibleLines, 0);
   //igv.setVisibleLines (found);
+}
+
+bool Simulator::pointInCircleSlice (
+  const vertex& point, const vertex& circ,
+  float minRad, float maxRad, 
+  float minTheta, float maxTheta
+){
+  vertex vec(point.x-circ.x, point.y-circ.y);
+  double dist = vec.distance ();
+  if ( (dist >= minRad) && (dist <= maxRad) ){
+    float theta = atan (abs(vec.y/vec.x)) * DEGREES_PER_RADIAN;
+    if (point.x >= circ.x){
+      if (point.y >= circ.y){
+        theta = 270.0+theta;
+      }else{
+        theta = 270.0-theta;
+      }
+    }else{
+      if (point.y >= circ.y){
+        theta = 90.0-theta;
+      }else{
+        theta = theta+90.0;
+      }
+    }
+    if ((theta >= minTheta) && (theta <= maxTheta)){
+      return true;
+    }
+  }
+  return false;
 }
 
 void Simulator::motion (int x, int y)
@@ -328,7 +362,7 @@ void Simulator::mouse (int button, int state, int x, int y)
 void Simulator::timer (int val)
 {
   updateIGV ();
-  //updateCamera ();
+  updateCamera (val);
   glutPostRedisplay ();
 	glutTimerFunc (18, timerWrapper, 0);
 }

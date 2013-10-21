@@ -60,9 +60,11 @@ bool Environment::insertEvenSpacedLine (vertex v, double spacing)
 			vertex tween (curLine->start.x+vec.x, curLine->start.y+vec.y);
 			float coveredDistance = 0;
 			do{
-				insertLineSegment (tween);
-				tween = vertex (tween.x+vec.x, tween.y+vec.y);
 				coveredDistance += spacing;
+				if (coveredDistance < dist){
+					insertLineSegment (tween);
+					tween = vertex (tween.x+vec.x, tween.y+vec.y);
+				}
 			}while (coveredDistance < dist);
 			
 			insertLineSegment (v);

@@ -22,5 +22,4 @@ const Line* Line::getNextLine (){
 
 void Line::draw ()
 {
-
 }

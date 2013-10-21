@@ -15,6 +15,10 @@ class vertex
             double dx = x-v.x, dy = y-v.y;    
             return sqrt (dx*dx + dy*dy);
         }
+        
+        double distance (){
+            return sqrt (x*x + y*y);
+        }
 
         long double x;
         long double y;

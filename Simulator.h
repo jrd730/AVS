@@ -51,12 +51,11 @@ class Simulator
     
     void setVisibleLines ();
     
-    void clipToCircleSlice 
-        (vector <pair <vertex, Line*> >& lines, 
-            const vertex& center, 
-            float minRad, float maxRad, 
-            float minTheta, float maxTheta
-        );
+    bool pointInCircleSlice (
+      const vertex& point, const vertex& circleCenter,
+      float minRad, float maxRad, 
+      float minTheta, float maxTheta
+    );
 
     //void updateCamera ();
 
