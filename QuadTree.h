@@ -48,7 +48,7 @@ class QuadTree
 		QuadTree <T>(vertex center, vertex range, unsigned bucketSize=1, unsigned depth = 16);
 		~QuadTree ();
 
-		void 	insert (vertex v, T data);
+		bool 	insert (vertex v, T data);
 		bool 	contains (vertex v);
 		bool 	remove (vertex v);
 		void 	draw ();
@@ -60,7 +60,7 @@ class QuadTree
 		QTNode<T>* childNode (const vertex& v, QTNode<T>* node);
 		vertex 	newCenter (int direction, QTNode <T>* node);
 		int 	direction (const vertex& point, QTNode <T>* node);
-		void 	insert (vertex v, T data, QTNode<T>* node, unsigned depth);
+		bool 	insert (vertex v, T data, QTNode<T>* node, unsigned depth);
 		void	reduce (stack <QTNode<T>*>& node);
 		void 	draw (QTNode<T>* node);
 		void 	print (QTNode <T>* node, stringstream& ss);

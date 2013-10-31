@@ -46,13 +46,22 @@ double IGV::getCameraSpread ()
   return cameraSpread; 
 }
 
-void IGV::setVisibleLines (vector <pair <vertex, Line*> >& lines)
+void IGV::setVisibleLines (vector <Line*>& lines)
 {
   visibleLines.clear ();
   visibleLines.resize(lines.size());
 
   for (unsigned i = 0; i < lines.size(); ++i){
-    visibleLines[i] = lines[i].second;
+    visibleLines[i] = lines[i];
+  }
+}
+
+void IGV::addVisibleLinesToMap ()
+{
+  for (int i = 0; i < visibleLines.size(); ++i){
+    if (env.lineMap->insert (visibleLines[i]->start, visibleLines[i])){
+      env.lines.push_back (visibleLines[i]);
+    }
   }
 }
 
@@ -69,11 +78,6 @@ void IGV::setSensorVertices ()
   sensorVertices[2] = 
   vertex ( cameraMaxRange * -sin ((cameraSpread/DEGREES_PER_RADIAN)/2.0), 
             cameraMaxRange * cos ((cameraSpread/DEGREES_PER_RADIAN)/2.0) );
-
-  // sensorVertices[1] = vertex (-1, 3);
-  // sensorVertices[2] = vertex (1, 3);
-  // sensorVertices[3] = vertex (0, 0);
-
 }
 
 void IGV::runProgram ()

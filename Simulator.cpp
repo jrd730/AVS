@@ -41,10 +41,14 @@ static int gui_window_id;
 bool keyMask [255];
 bool arrowKeys [4];
 
-bool drawIGV = false;
-bool drawEnv = true;
-bool drawSelectionBox = false;
-bool drawVisibleLines = true;
+int drawIGV = false;
+int drawEnv = true;
+int drawSelectionBox = false;
+int drawVisibleLines = true;
+
+int displayMode = 0;
+
+GLUI *glui;
 
 Simulator* Simulator::callbackInstance (NULL);
 
@@ -102,7 +106,16 @@ static void zoom (double xAmount, double yAmount)
 
 static void editModeCallBack (int val)
 {
+  cout << "Radio Callback: " << val << endl;
+}
 
+static void viewModeCallBack (int val)
+{
+  switch (val){
+    case 1:
+    break;
+  }
+  cout << "value of drawEnv: " << drawEnv << endl;
 }
 
 static void updateCamera (int val)
@@ -156,14 +169,14 @@ void Simulator::init (int argc, char** argv)
   glClearColor(0, 0, 0, 0);
 
   glutMotionFunc (motionWrapper);
-  glutMouseFunc (mouseWrapper);
+  GLUI_Master.set_glutMouseFunc (mouseWrapper);
   glutTimerFunc (16, timerWrapper, 0);
   //glutTimerFunc (40, updateCamera, 0);
   glutDisplayFunc(displayWrapper);
-  glutReshapeFunc(reshapeWrapper);
-  glutKeyboardFunc(keyboardWrapper);
+  GLUI_Master.set_glutReshapeFunc(reshapeWrapper);
+  GLUI_Master.set_glutKeyboardFunc(keyboardWrapper);
   glutKeyboardUpFunc(keyboardUpWrapper);
-  glutSpecialFunc(specialWrapper);
+  GLUI_Master.set_glutSpecialFunc(specialWrapper);
   glutSpecialUpFunc(specialUpWrapper);
   fill(keyMask, keyMask+255, 0);
 
@@ -173,20 +186,30 @@ void Simulator::init (int argc, char** argv)
 void Simulator::initGUI ()
 {
   //gui_window_id = glutCreateWindow("Simulator Parameters");
-  GLUI *glui = GLUI_Master.create_glui ( "Simulator Parameters", 0, 200, 200);
-  glui->add_checkbox ("click me");
-  glui->add_checkbox ("click me");
-  glui->add_checkbox ("click me");
+  glui = GLUI_Master.create_glui ( "Simulator Parameters", 0, 200, 200);
+  GLUI_Master.set_glutIdleFunc(NULL);
+  
+  glui->add_checkbox ("Draw Entire Maze", &drawEnv, 1, viewModeCallBack);
+  glui->add_checkbox ("Draw IGV", &drawIGV, 2, viewModeCallBack);
+  glui->add_checkbox ("Draw Visible Region", &drawVisibleLines, 3, viewModeCallBack);
+  
   glui->add_button ("I\'m a button");
   GLUI_Panel *panel = glui->add_panel ("Panel");
   glui->add_button_to_panel (panel, "Buttons");
-  glui->add_column_to_panel (panel, true);
+  //glui->add_column_to_panel (panel, true);
   glui->add_button_to_panel (panel, "Are");
-  glui->add_column_to_panel (panel, true);
+  //glui->add_column_to_panel (panel, true);
   glui->add_button_to_panel (panel, "Cool");
-  GLUI_RadioGroup* displayMode = glui->add_radiogroup (NULL, 0, editModeCallBack);
-  //GLUI_RadioButton editMode = glui->add_radiobutton_to_group (displayMode, "edit map");
-  //GLUI_RadioButton editMode (displayMode, "edit map");
+  
+  GLUI_RadioGroup* displayModeRadio = 
+    glui->add_radiogroup_to_panel (panel, &displayMode, 3, editModeCallBack);
+  
+  GLUI_RadioButton* editMode = 
+    glui->add_radiobutton_to_group (displayModeRadio, "edit map");
+  
+  GLUI_RadioButton* simMode  = 
+    glui->add_radiobutton_to_group (displayModeRadio, "simulate");
+  
   //GLUI_RadioButton 
 }
 
@@ -249,6 +272,7 @@ void Simulator::updateIGV ()
   }
   
   setVisibleLines ();
+  igv.addVisibleLinesToMap ();
 }
 
 void Simulator::setVisibleLines ()
@@ -258,8 +282,7 @@ void Simulator::setVisibleLines ()
       {igv.position.x-igv.getCameraRange(), igv.position.y-igv.getCameraRange()}, 
       {igv.position.x+igv.getCameraRange(), igv.position.y+igv.getCameraRange()});
 
-  visibleLines.clear();
-  //visibleLines.resize(found.size());
+  igv.visibleLines.clear();
 
   for (int i=0; i < found.size(); ++i){
     if ( pointInCircleSlice (
@@ -268,11 +291,9 @@ void Simulator::setVisibleLines ()
         igv.rotation-(igv.cameraSpread/2.0),
         igv.rotation+(igv.cameraSpread/2.0) )
       ){
-      visibleLines.push_back( found[i].second ) ;
+      igv.visibleLines.push_back( found[i].second ) ;
     }
   }
-  //glutTimerFunc (250, setVisibleLines, 0);
-  //igv.setVisibleLines (found);
 }
 
 bool Simulator::pointInCircleSlice (
@@ -319,7 +340,7 @@ void Simulator::motion (int x, int y)
       //findPoints ();
     }
     
-    glutPostRedisplay();
+    //glutPostRedisplay();
 }
 
 void Simulator::mouse (int button, int state, int x, int y)
@@ -355,7 +376,7 @@ void Simulator::mouse (int button, int state, int x, int y)
         }
       break;
     }
-    glutPostRedisplay();
+    //glutPostRedisplay();
 }
 
 
@@ -364,6 +385,9 @@ void Simulator::timer (int val)
   updateIGV ();
   updateCamera (val);
   glutPostRedisplay ();
+  glui->sync_live();
+
+  //cout << "value of drawEnv: " << drawEnv << endl;
 	glutTimerFunc (18, timerWrapper, 0);
 }
 
@@ -410,13 +434,21 @@ void Simulator::display()
   if (drawVisibleLines){
     glColor3f (0, 1, 0);
       glBegin (GL_LINES);
-      for (int i=0; i < visibleLines.size(); ++i){
-        if (visibleLines[i]->next != NULL)
+      // for (int i=0; i < igv.visibleLines.size(); ++i){
+      //   if (igv.visibleLines[i]->next != NULL)
+      //   {
+      //     glVertex2f (igv.visibleLines[i]->start.x, igv.visibleLines[i]->start.y);
+      //     glVertex2f (igv.visibleLines[i]->next->start.x, igv.visibleLines[i]->next->start.y);
+      //   }
+      // }
+      for (int i=0; i < igv.env.lines.size(); ++i){
+        if (igv.env.lines[i]->next != NULL)
         {
-          glVertex2f (visibleLines[i]->start.x, visibleLines[i]->start.y);
-          glVertex2f (visibleLines[i]->next->start.x, visibleLines[i]->next->start.y);
+          glVertex2f (igv.env.lines[i]->start.x, igv.env.lines[i]->start.y);
+          glVertex2f (igv.env.lines[i]->next->start.x, igv.env.lines[i]->next->start.y);
         }
       }
+
       glEnd();
   }
 
@@ -488,7 +520,7 @@ void Simulator::keyboard(unsigned char key, int x, int y)
         //findPoints ();
       break;
   }
-  glutPostRedisplay();
+  //glutPostRedisplay();
 }
 
 void Simulator::keyboardUp(unsigned char key, int x, int y)

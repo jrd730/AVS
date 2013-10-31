@@ -17,9 +17,9 @@ QuadTree<T>::~QuadTree ()
 }
 
 template <typename T>
-void QuadTree<T>::insert (vertex v, T data)
+bool QuadTree<T>::insert (vertex v, T data)
 {
-	insert (v, data, root, 0);
+	return insert (v, data, root, 0);
 }
 
 template <typename T>
@@ -76,7 +76,7 @@ vertex QuadTree<T>::newCenter (int direction, QTNode<T>* node)
 }
 
 template <typename T>
-void QuadTree<T>::insert (vertex v, T data, QTNode<T>* node, unsigned depth)
+bool QuadTree<T>::insert (vertex v, T data, QTNode<T>* node, unsigned depth)
 {
 	// by design, vertices are stored only in leaf nodes
 	// newly created nodes are leaf nodes by default
@@ -84,6 +84,7 @@ void QuadTree<T>::insert (vertex v, T data, QTNode<T>* node, unsigned depth)
 		// there is room in this node's bucket
 		if (node->bucket.size() < maxBucketSize){
 			node->bucket.push_back ({v, data});
+			return true;
 		}
 		// bucket is full, so push all vertices to next depth,
 		// clear the current node's bucket and make it a stem
@@ -95,10 +96,13 @@ void QuadTree<T>::insert (vertex v, T data, QTNode<T>* node, unsigned depth)
 			}
 			node->bucket.clear();
 		}
+		else{
+			return false;
+		}
 	}
 	// current node is a stem node used for navigation
 	else{
-		insert (v, data, childNode (v, node), depth+1);
+		return insert (v, data, childNode (v, node), depth+1);
 	}
 }
 

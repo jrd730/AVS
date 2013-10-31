@@ -19,7 +19,9 @@ public:
   void setCameraSpread (double spread);
   double getCameraSpread ();
 
-  void setVisibleLines (vector <pair <vertex, Line*> >& lines);
+  void setVisibleLines (vector <Line*>& lines);
+
+  void addVisibleLinesToMap ();
 
 	void runProgram ();
 
@@ -28,19 +30,19 @@ public:
   double cameraMaxRange; // meters from center
   double cameraMinRange; // meters from center
 	double cameraSpread; // degrees
+  
+  vector <Line*> visibleLines;
 
-private:
+  Environment  env;
 
   void setSensorVertices ();
 
-  vector <Line*> visibleLines;
-
   NavMesh paths;
   //QuadTree <int>* knownObstacles;
-  Environment  env;
-
 
   vector <vertex> modelVertices; //meters from center
   vector <vertex> sensorVertices; //meters from center
+
+  private:
 
 };

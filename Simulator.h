@@ -52,7 +52,7 @@ class Simulator
     void setVisibleLines ();
     
     bool pointInCircleSlice (
-      const vertex& point, const vertex& circleCenter,
+      const vertex& point, const vertex& circ,
       float minRad, float maxRad, 
       float minTheta, float maxTheta
     );

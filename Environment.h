@@ -29,10 +29,10 @@ class Environment
 		void insertPolygon (vertex v, int radius, int sides);
 		
 		QuadTree <Line*>* lineMap;
+		vector <Line*> lines;
 
 	private:
 
-		vector <Line*> lines;
 		vector <Line*> lineStarts;
 
 		Line* curLine;
