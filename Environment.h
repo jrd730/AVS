@@ -17,6 +17,7 @@ class Environment
 		~Environment ();
 
 		void destroy ();
+		void clear ();
 
 		void insertLineSegment (vertex v);
 		bool insertEvenSpacedLine (vertex v, double spacing);

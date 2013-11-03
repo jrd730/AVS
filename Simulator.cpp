@@ -512,8 +512,10 @@ void Simulator::keyboard(unsigned char key, int x, int y)
       break; 
 
       case '~':
-        env.destroy();
-        targetPoint.clear();
+        igv.visibleLines.clear ();
+        //igv.env.destroy ();
+        igv.env.clear ();
+        env.destroy ();
       break;
 
       case 'f':

@@ -20,10 +20,21 @@ void Environment::destroy ()
 	lineMap = new QuadTree <Line*> (origin, axis, 1, 26);
 
 	for (int i=0; i < lines.size(); ++i){
-		delete lines[i];
+		if (lines[i])
+			delete lines[i];
 	}
 
 	lines.clear();
+	lineStarts.clear();
+
+	curLine = NULL;
+}
+
+void Environment::clear ()
+{
+	delete lineMap;
+	lineMap = new QuadTree <Line*> (origin, axis, 1, 26);
+	lines.clear ();
 	lineStarts.clear();
 
 	curLine = NULL;
