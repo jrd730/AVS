@@ -17,7 +17,7 @@ object feeds the IGV's sensors, so that the IGV can map out its environment.
 #include "IGV.h"
 
 enum INSERT_MODE{
-	INSERT_LINE, INSERT_POLYGON
+	INSERT_LINE, INSERT_POLYGON, INSERT_WAYPOINT
 };
 
 enum ARROW_ID {

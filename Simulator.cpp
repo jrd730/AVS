@@ -325,60 +325,6 @@ bool Simulator::pointInCircleSlice (
   return false;
 }
 
-void Simulator::motion (int x, int y)
-{
-  vertex newpoint ( x*pixToXCoord + graphXMin, -y*pixToYCoord + graphYMax);
-
-  if (leftMouseDown){
-      if (env.insertEvenSpacedLine (newpoint, minLineGap))
-      {
-        targetPoint.push_back(newpoint);
-      }
-    }
-    else if (rightMouseDown){
-      squareCenter = newpoint;
-      //findPoints ();
-    }
-    
-    //glutPostRedisplay();
-}
-
-void Simulator::mouse (int button, int state, int x, int y)
-{
-  vertex newpoint ( x*pixToXCoord + graphXMin, -y*pixToYCoord + graphYMax);
-
-    switch (button){
-      case GLUT_LEFT_BUTTON:
-        switch (state){
-          case GLUT_DOWN:
-              leftMouseDown = 1;
-              targetPoint.push_back(newpoint);
-              env.insertLineSegment (newpoint);
-          break;
-
-          case GLUT_UP:
-              leftMouseDown = 0;
-              env.endLineSegment ();
-          break;
-        }
-      break;
-      case GLUT_RIGHT_BUTTON:
-        switch (state){
-          case GLUT_DOWN:
-            rightMouseDown = 1;
-            squareCenter = newpoint;
-            //findPoints ();
-          break;
-
-          case GLUT_UP:
-            rightMouseDown = 0;
-          break;
-        }
-      break;
-    }
-    //glutPostRedisplay();
-}
-
 
 void Simulator::timer (int val)
 {
@@ -410,6 +356,7 @@ void Simulator::display()
 
   if (drawEnv){
     env.drawLineSegments ();
+    env.drawWaypoints ();
   }
 
   if (drawSelectionBox){
@@ -471,6 +418,65 @@ void Simulator::reshape(int w, int h)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
+
+void Simulator::motion (int x, int y)
+{
+  vertex newpoint ( x*pixToXCoord + graphXMin, -y*pixToYCoord + graphYMax);
+
+  if (leftMouseDown){
+      if (env.insertEvenSpacedLine (newpoint, minLineGap))
+      {
+        targetPoint.push_back(newpoint);
+      }
+    }
+    else if (rightMouseDown){
+      squareCenter = newpoint;
+      //findPoints ();
+    }
+    
+    //glutPostRedisplay();
+}
+
+void Simulator::mouse (int button, int state, int x, int y)
+{
+  vertex newpoint ( x*pixToXCoord + graphXMin, -y*pixToYCoord + graphYMax);
+
+    switch (button){
+      case GLUT_LEFT_BUTTON:
+        switch (state){
+          case GLUT_DOWN:
+              leftMouseDown = 1;
+              targetPoint.push_back(newpoint);
+              env.insertLineSegment (newpoint);
+          break;
+
+          case GLUT_UP:
+              leftMouseDown = 0;
+              env.endLineSegment ();
+          break;
+        }
+      break;
+      case GLUT_RIGHT_BUTTON:
+        switch (state){
+          case GLUT_DOWN:
+            rightMouseDown = 1;
+            squareCenter = newpoint;
+            //findPoints ();
+
+            env.insertWaypoint (newpoint);
+
+          break;
+
+          case GLUT_UP:
+            rightMouseDown = 0;
+          break;
+        }
+      break;
+    }
+    //glutPostRedisplay();
+}
+
+
 
 void Simulator::keyboard(unsigned char key, int x, int y)
 {

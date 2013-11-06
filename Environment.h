@@ -28,9 +28,15 @@ class Environment
 		void drawLineQuadTree ();
 
 		void insertPolygon (vertex v, int radius, int sides);
+
+		void insertWaypoint (vertex v);
+		void drawWaypoints ();
+		void drawWaypoint (const vertex& wp);
 		
 		QuadTree <Line*>* lineMap;
+
 		vector <Line*> lines;
+		vector <vertex> waypoints;
 
 	private:
 

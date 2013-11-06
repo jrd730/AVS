@@ -3,10 +3,23 @@
 static vertex origin (0, 0);
 static vertex axis (128.0, 128.0);
 
+const static int numWaypointVertices = 10;
+static float waypointRadius = 0.2;
+static float sharpness = 0.5;
+static vertex waypointVertices [numWaypointVertices];
+
 Environment::Environment ()
 {
 	curLine = NULL;
 	lineMap = new QuadTree <Line*> (origin, axis, 1, 26);
+
+
+	for (int i = 0; i < numWaypointVertices; ++i){
+		waypointVertices[i] = 
+vertex ( (waypointRadius - (i&1)*sharpness)*sin (i*(2*M_PI/numWaypointVertices)), 
+				(waypointRadius - (i&1)*sharpness)*cos (i*(2*M_PI/numWaypointVertices)) 
+		);
+	}
 }
 
 Environment::~Environment ()
@@ -98,6 +111,38 @@ void Environment::endLineSegment ()
 	curLine = NULL;
 }
 
+void Environment::insertPolygon (vertex v, int radius, int sides)
+{
+
+}
+
+void Environment::insertWaypoint (vertex v)
+{
+	waypoints.push_back (v);
+}
+
+void Environment::drawWaypoints ()
+{
+	for (int i = 0; i < waypoints.size(); ++i){
+		drawWaypoint (waypoints[i]);
+	}	
+}
+
+void Environment::drawWaypoint (const vertex& wp)
+{
+	glPushMatrix ();
+	glColor3f (0, 0, 1.0);
+	glTranslatef (wp.x, wp.y, 0);
+	glBegin (GL_TRIANGLE_FAN);
+	glVertex2f (0, 0);
+	for (int i=0; i < numWaypointVertices; ++i){
+		glVertex2f (waypointVertices[i].x, waypointVertices[i].y);
+	}
+	glVertex2f (waypointVertices[0].x, waypointVertices[0].y);
+	glEnd ();
+	glPopMatrix ();
+}
+
 void Environment::printLineSegments (ostream& os)
 {
 	for (int i = 0; i < lineStarts.size(); ++i)
@@ -131,7 +176,3 @@ void Environment::drawLineQuadTree ()
 	}
 }
 
-void Environment::insertPolygon (vertex v, int radius, int sides)
-{
-
-}
