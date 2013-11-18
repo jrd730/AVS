@@ -9,6 +9,9 @@ the ratio of angular velocities of each wheel.
 #include <cmath>
 #include "Vertex.h"
 #define DEGREES_PER_RADIAN 57.2957795
+#define BASE_FORWARD_SPEED 0.1
+#define BASE_ROTATE_SPEED 1.0
+
 class DDV
 {
 public:
@@ -22,19 +25,15 @@ public:
 	void translate  (vertex amount);
 	void setPosition (vertex pos);
 
-	void reposition (double dt);
+	void setForwardSpeed (double amt);
+	void setRotateSpeed (double amt);
+	void fullStop ();
+
+	void updatePosition ();
 	
 	vertex position;
 	double rotation; // zero is facing north
-	double leftMotorSpeed;
-	double rightMotorSpeed;
 
-	// these variables can be used in conjunction with 
-	// left and right motor speeds to come up with an 
-	// estimate of the bot's updated position and 
-	// direction after an indicated time slice
-	double axleWidth;
-	double wheelRadius;
-	double wheelPerimeter;
-
+	double fwdSpd;
+	double rteSpd;
 };

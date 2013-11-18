@@ -7,6 +7,7 @@ An intelligent ground vehicle is like a regular vehicle but with a brain and the
 #include "NavMesh.h"
 #include "QuadTree.h"
 
+
 class IGV : public DDV
 {
 public:
@@ -42,6 +43,8 @@ public:
 
   vector <vertex> modelVertices; //meters from center
   vector <vertex> sensorVertices; //meters from center
+
+  bool autonomousMode; 
 
   private:
 

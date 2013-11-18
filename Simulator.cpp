@@ -50,6 +50,10 @@ int displayMode = 0;
 
 GLUI *glui;
 
+static vertex pix_coord_to_point (int x, int y) { 
+  return vertex ( x*pixToXCoord + graphXMin, -y*pixToYCoord + graphYMax);
+}
+
 Simulator* Simulator::callbackInstance (NULL);
 
 static void initializeViewMatrix ()
@@ -271,19 +275,28 @@ void Simulator::updateIGV ()
     igv.setCameraSpread (igv.getCameraSpread()-0.3);
   }
   
+  // simulates camera interface by checking environment for lines in IGV's
+  // current line of sight
   setVisibleLines ();
-  igv.addVisibleLinesToMap ();
+
+  igv.updatePosition ();
+
+  igv.runProgram ();
+
 }
 
 void Simulator::setVisibleLines ()
 {
   vector <pair <vertex, Line*> > found;
+
+  // get all points in rectangular region around the IGV
   found = env.lineMap->getObjectsInRegion (
       {igv.position.x-igv.getCameraRange(), igv.position.y-igv.getCameraRange()}, 
       {igv.position.x+igv.getCameraRange(), igv.position.y+igv.getCameraRange()});
 
   igv.visibleLines.clear();
 
+  // add points which are in the IGV's camera's view
   for (int i=0; i < found.size(); ++i){
     if ( pointInCircleSlice (
         found[i].first, igv.position, 
@@ -356,7 +369,6 @@ void Simulator::display()
 
   if (drawEnv){
     env.drawLineSegments ();
-    env.drawWaypoints ();
   }
 
   if (drawSelectionBox){
@@ -401,6 +413,7 @@ void Simulator::display()
 
   if (drawIGV){
     igv.draw();
+    igv.env.drawWaypoints ();
   }
 
   glutSwapBuffers();
@@ -439,7 +452,7 @@ void Simulator::motion (int x, int y)
 
 void Simulator::mouse (int button, int state, int x, int y)
 {
-  vertex newpoint ( x*pixToXCoord + graphXMin, -y*pixToYCoord + graphYMax);
+  vertex newpoint ( pix_coord_to_point (x, y) );
 
     switch (button){
       case GLUT_LEFT_BUTTON:
@@ -463,7 +476,7 @@ void Simulator::mouse (int button, int state, int x, int y)
             squareCenter = newpoint;
             //findPoints ();
 
-            env.insertWaypoint (newpoint);
+            igv.env.insertWaypoint (newpoint);
 
           break;
 
@@ -484,7 +497,7 @@ void Simulator::keyboard(unsigned char key, int x, int y)
   keyMask[key] = true;
 	switch (key){
       case 'k':
-          drawQuadTree = !drawQuadTree;
+        drawQuadTree = !drawQuadTree;
       break;
 
       case 'p':
@@ -499,12 +512,12 @@ void Simulator::keyboard(unsigned char key, int x, int y)
 
       case 'i':
       case 'I':
-          drawIGV = !drawIGV;
+        drawIGV = !drawIGV;
       break;
 
       case 'u':
       case 'U':
-          drawEnv = !drawEnv;
+        drawEnv = !drawEnv;
       break;
 
       case 'j':
@@ -526,6 +539,11 @@ void Simulator::keyboard(unsigned char key, int x, int y)
 
       case 'f':
         //findPoints ();
+      break;
+
+      case 'r':
+        igv.autonomousMode = !igv.autonomousMode;
+        if (!igv.autonomousMode) igv.fullStop ();
       break;
   }
   //glutPostRedisplay();

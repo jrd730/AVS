@@ -2,7 +2,11 @@
 
 static double base_speed = .01;
 
-IGV::IGV ()
+IGV::IGV () :
+  cameraMinRange (0.1),
+  cameraMaxRange (5.0),
+  cameraSpread   (70.0),
+  autonomousMode (false)
 {
   modelVertices.resize (6);
   modelVertices[0] = vertex (-.325, .325);
@@ -12,16 +16,21 @@ IGV::IGV ()
   modelVertices[4] = vertex ( -.175, -.925);
   modelVertices[5] = vertex ( -.325, -.325);
 
-  cameraMinRange = 0.1;
-  cameraMaxRange = 5.0;
-  cameraSpread = 70.0;
-
   setSensorVertices ();
 }
 
 IGV::~IGV ()
 {
 	
+}
+
+void IGV::runProgram ()
+{
+  addVisibleLinesToMap ();
+  if (autonomousMode){
+    setForwardSpeed (1.0);
+    setRotateSpeed (1.0);
+  }
 }
 
 void IGV::setCameraRange (double range)
@@ -78,11 +87,6 @@ void IGV::setSensorVertices ()
   sensorVertices[2] = 
   vertex ( cameraMaxRange * -sin ((cameraSpread/DEGREES_PER_RADIAN)/2.0), 
             cameraMaxRange * cos ((cameraSpread/DEGREES_PER_RADIAN)/2.0) );
-}
-
-void IGV::runProgram ()
-{
-  
 }
 
 void IGV::draw ()

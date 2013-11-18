@@ -2,7 +2,7 @@
 
 DDV::DDV ():
   position({0, 0}), rotation (0),
-  leftMotorSpeed (0), rightMotorSpeed (0)
+  fwdSpd (0), rteSpd (0)
 {
 
 }
@@ -42,4 +42,26 @@ void DDV::translate  (vertex amount)
 void DDV::setPosition (vertex pos)
 {
   position = pos;
+}
+
+void DDV::setForwardSpeed (double amt)
+{
+  fwdSpd = amt;
+}
+
+void DDV::setRotateSpeed (double amt)
+{
+  rteSpd = amt;
+}
+
+void DDV::fullStop ()
+{
+  setForwardSpeed (0);
+  setRotateSpeed (0);
+}
+
+void DDV::updatePosition ()
+{
+  forward (fwdSpd * BASE_FORWARD_SPEED);
+  rotate (rteSpd * BASE_ROTATE_SPEED);
 }
