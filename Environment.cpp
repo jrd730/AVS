@@ -57,15 +57,18 @@ void Environment::insertLineSegment (vertex v)
 {
 	if (!curLine){
 		curLine = new Line (v);
-		lines.push_back (curLine);
-		lineMap->insert (v, curLine);
-		lineStarts.push_back (curLine);
+		
+		if (lineMap->insert (v, curLine)){
+			lines.push_back (curLine);
+			lineStarts.push_back (curLine);
+		}
 	}
 	else{
 		curLine = new Line (v, lines[lines.size()-1], NULL);
-		lines[lines.size()-1]->setNextLine (curLine);
-		lines.push_back (curLine);
-		lineMap->insert (v, curLine);
+		if (lineMap->insert (v, curLine)){
+			lines[lines.size()-1]->setNextLine (curLine);
+			lines.push_back (curLine);
+		}
 	}
 }
 

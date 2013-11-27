@@ -32,6 +32,7 @@ class Simulator
 		~Simulator ();
 
 		void init (int argc, char** argv);
+    void reset ();
 		void run ();
 
 	private:
@@ -42,6 +43,8 @@ class Simulator
 		static Simulator* callbackInstance;
 
     void initGUI ();
+
+    void buttonPressed (int button);
 
     void saveEnvironment ();
     
@@ -69,6 +72,7 @@ class Simulator
     void keyboard(unsigned char, int, int);
     void keyboardUp(unsigned char, int, int);
 
+    static void buttonWrapper (int);
     static void specialWrapper (int, int, int);
     static void specialUpWrapper (int, int, int);
   	static void motionWrapper (int, int);

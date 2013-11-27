@@ -159,13 +159,20 @@ Simulator::~Simulator ()
 
 }
 
+
+void Simulator::reset ()
+{
+  igv.visibleLines.clear ();
+  //igv.env.destroy ();
+  igv.env.clear ();
+  env.destroy ();
+}
+
 void Simulator::init (int argc, char** argv)
 {
 	glutInit(&argc, argv);
   glutInitDisplayMode( GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
   glutInitWindowSize (width, height);
-  //glutInitContextVersion( 3, 2 );
-  //glutInitContextProfile( GLUT_CORE_PROFILE );
   gl_window_id = glutCreateWindow ("Autonomous Vehicle Simulator");
   //glutSetWindowTitle("");
   //glutSetIconTitle("");
@@ -197,7 +204,7 @@ void Simulator::initGUI ()
   glui->add_checkbox ("Draw IGV", &drawIGV, 2, viewModeCallBack);
   glui->add_checkbox ("Draw Visible Region", &drawVisibleLines, 3, viewModeCallBack);
   
-  glui->add_button ("I\'m a button");
+  glui->add_button ("Reset Environment", 1, buttonWrapper);
   GLUI_Panel *panel = glui->add_panel ("Panel");
   glui->add_button_to_panel (panel, "Buttons");
   //glui->add_column_to_panel (panel, true);
@@ -215,6 +222,15 @@ void Simulator::initGUI ()
     glui->add_radiobutton_to_group (displayModeRadio, "simulate");
   
   //GLUI_RadioButton 
+}
+
+void Simulator::buttonPressed (int button)
+{
+  switch (button){
+    case 1:
+      reset ();
+    break;
+  }
 }
 
 void Simulator::saveEnvironment ()
@@ -393,13 +409,7 @@ void Simulator::display()
   if (drawVisibleLines){
     glColor3f (0, 1, 0);
       glBegin (GL_LINES);
-      // for (int i=0; i < igv.visibleLines.size(); ++i){
-      //   if (igv.visibleLines[i]->next != NULL)
-      //   {
-      //     glVertex2f (igv.visibleLines[i]->start.x, igv.visibleLines[i]->start.y);
-      //     glVertex2f (igv.visibleLines[i]->next->start.x, igv.visibleLines[i]->next->start.y);
-      //   }
-      // }
+      
       for (int i=0; i < igv.env.lines.size(); ++i){
         if (igv.env.lines[i]->next != NULL)
         {
@@ -412,6 +422,13 @@ void Simulator::display()
   }
 
   if (drawIGV){
+    for (int i=0; i < igv.visibleLines.size(); ++i){
+      if (igv.visibleLines[i]->next != NULL)
+      {
+        glVertex2f (igv.visibleLines[i]->start.x, igv.visibleLines[i]->start.y);
+        glVertex2f (igv.visibleLines[i]->next->start.x, igv.visibleLines[i]->next->start.y);
+      }
+    }
     igv.draw();
     igv.env.drawWaypoints ();
   }
@@ -531,10 +548,7 @@ void Simulator::keyboard(unsigned char key, int x, int y)
       break; 
 
       case '~':
-        igv.visibleLines.clear ();
-        //igv.env.destroy ();
-        igv.env.clear ();
-        env.destroy ();
+        reset ();
       break;
 
       case 'f':
@@ -594,6 +608,10 @@ void Simulator::specialUp (int key, int x, int y)
       arrowKeys[ARROW_RIGHT] = false;
     break;
   }
+}
+
+void Simulator::buttonWrapper (int button){
+  callbackInstance->buttonPressed (button);
 }
 
 void Simulator::specialWrapper (int key, int x, int y){
