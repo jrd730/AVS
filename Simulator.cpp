@@ -41,10 +41,10 @@ static int gui_window_id;
 bool keyMask [255];
 bool arrowKeys [4];
 
-int drawIGV = false;
-int drawEnv = true;
-int drawSelectionBox = false;
-int drawVisibleLines = true;
+int drawIGV = 1;
+int drawEnv = 1;
+int drawSelectionBox = 0;
+int drawVisibleLines = 1;
 
 int displayMode = 0;
 
@@ -417,7 +417,6 @@ void Simulator::display()
           glVertex2f (igv.env.lines[i]->next->start.x, igv.env.lines[i]->next->start.y);
         }
       }
-
       glEnd();
   }
 
@@ -431,6 +430,9 @@ void Simulator::display()
     }
     igv.draw();
     igv.env.drawWaypoints ();
+
+    glColor3f (1, 1, 0);
+    igv.pf.draw ();
   }
 
   glutSwapBuffers();
@@ -558,6 +560,15 @@ void Simulator::keyboard(unsigned char key, int x, int y)
       case 'r':
         igv.autonomousMode = !igv.autonomousMode;
         if (!igv.autonomousMode) igv.fullStop ();
+      break;
+
+      case 't':
+        igv.pf.clear ();
+        igv.findPath (vertex(3.0, 3.0));
+      break;
+
+      case 'e':
+        igv.pf.expand ();
       break;
   }
   //glutPostRedisplay();

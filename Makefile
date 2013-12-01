@@ -1,7 +1,7 @@
 CXX = g++
 CPPFLAGS = -g -w
 
-OBJS = main.cpp DDV.cpp IGV.cpp Line.cpp Simulator.cpp Environment.cpp QuadTree.cpp NavMesh.cpp
+OBJS = main.cpp DDV.cpp IGV.cpp Line.cpp Simulator.cpp Environment.cpp QuadTree.cpp NavMesh.cpp Pathfinder.cpp
 
 INCLUDE_PATHS = -I/usr/local/include/GL -I/usr/local/include/GLFW -I/opt/X11/include
 

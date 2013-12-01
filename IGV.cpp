@@ -16,6 +16,8 @@ IGV::IGV () :
   modelVertices[4] = vertex ( -.175, -.925);
   modelVertices[5] = vertex ( -.325, -.325);
 
+  pf.set (8, 0.5, 0.3, 0.5);
+
   setSensorVertices ();
 }
 
@@ -24,12 +26,20 @@ IGV::~IGV ()
 	
 }
 
+void IGV::findPath (vertex target)
+{
+  pf.begin (env.lineMap, position, target);
+  //while (pf.expand () && !pf.done ());
+}
+
 void IGV::runProgram ()
 {
   addVisibleLinesToMap ();
-  if (autonomousMode){
-    setForwardSpeed (1.0);
-    setRotateSpeed (1.0);
+
+  if (autonomousMode)
+  {
+    // setForwardSpeed (1.0);
+    // setRotateSpeed (1.0);
   }
 }
 

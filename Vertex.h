@@ -25,5 +25,9 @@ class vertex
 
         vertex operator *(float m) {return vertex (x*m, y*m);}
         vertex operator /(float m) {return vertex (x/m, y/m);}
+        vertex operator +(float m) {return vertex (x+m, y+m);}
+        vertex operator -(float m) {return vertex (x-m, y-m);}
+        vertex operator +(vertex v){return vertex (x+v.x, y+v.y);}
+        vertex operator -(vertex v){return vertex (x-v.x, y-v.y);}
         bool operator == (vertex v){ return ((x == v.x)&&(y==v.y)); }
 };
