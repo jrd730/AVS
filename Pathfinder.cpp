@@ -5,8 +5,10 @@ static vertex axis (128.0, 128.0);
 
 Pathfinder::Pathfinder ()
 {
+  found_path = false;
+  working = false;
   root = NULL;
-  max_expansions = 10;
+  max_expansions = 100;
 }
 
 Pathfinder::~Pathfinder ()
@@ -20,8 +22,11 @@ void Pathfinder::clear ()
     delete root;
 
   root = NULL;
-
   while (!q.empty()) q.pop ();
+  path.clear ();
+  
+  found_path = false;
+  working = false;
 }
 
 void Pathfinder::set (int div, float rad, float cd, float wb)
@@ -30,10 +35,20 @@ void Pathfinder::set (int div, float rad, float cd, float wb)
   radius = rad;
   crowded_dist = cd;
   wall_buf = wb;
+
+  float theta = 360.0 / (float)divisions;
+  v.resize (divisions);
+  
+  for (int i = 0; i < divisions; ++i){
+    v[i].x = radius * cos ( (theta*i)/DEGREES_PER_RADIAN );
+    v[i].y = radius * sin ( (theta*i)/DEGREES_PER_RADIAN );
+  }
 }
 
 void Pathfinder::begin (QuadTree <Line*>* w, vertex s, vertex e)
 {
+  found_path = false;
+  working = true;
   walls = w;
   start = s;
   end = e;
@@ -45,34 +60,28 @@ void Pathfinder::begin (QuadTree <Line*>* w, vertex s, vertex e)
 
 bool Pathfinder::canExpand (vertex v)
 {
-  cout << "checking for walls...";
   vector <pair <vertex, Line*> > blockingWalls = walls->getObjectsInRegion (v-wall_buf, v+wall_buf);
   if (blockingWalls.size () > 0) return false;
-  cout << "complete\n";
 
-  cout << "checking for crowding...";
   vector <pair <vertex, PathNode*> > traversed = visited->getObjectsInRegion (v-crowded_dist, v+crowded_dist);
   if (traversed.size () > 0) return false;
-  cout << "complete\n";
 
   return true;
+}
 
+void Pathfinder::setPath (PathNode* p)
+{
+  for (; p; p=p->prev){
+    if (p != NULL){
+      path.push_front (p);
+    }
+  }
 }
 
 bool Pathfinder::expand ()
 {
-  float theta = 360.0 / (float)divisions;
-  vertex v[divisions];
-  
-  cout << "setting expansion intervals...";
-  for (int i = 0; i < divisions; ++i){
-    v[i].x = radius * cos ( (theta*i)/DEGREES_PER_RADIAN );
-    v[i].y = radius * sin ( (theta*i)/DEGREES_PER_RADIAN );
-  }
-  cout << "complete\n";
-
   int num_expansions = 0;
-  while ( !q.empty() && (num_expansions < max_expansions) )
+  while ( !q.empty() && (num_expansions < max_expansions) && !found_path)
   {
     list <PathNode*> newNodes;
     for (int i = 0; i < divisions; ++i)
@@ -81,22 +90,28 @@ bool Pathfinder::expand ()
       vertex expansionPoint = top->pos + v[i];
       if (canExpand (expansionPoint) )
       {
-        cout << "able to expand\n";
-        float weight = expansionPoint.distance (end);
-        if (weight < 0.5) found_path = true;
-
-        PathNode* newNode = new PathNode (expansionPoint, top, divisions, weight);
+        PathNode* newNode = new PathNode (expansionPoint, top, divisions);
+        
+        newNode->dist_to = top->dist_to + radius;
+        newNode->dist_remaining = expansionPoint.distance (end);
+        newNode->setWeight ();
+        
         visited->insert (expansionPoint, newNode);
         newNodes.push_back (newNode);
+        
         top->next[i] = newNode;
         num_expansions++;
-      }
-      else{
-        cout << "unable to expand\n";
+
+        if (newNode->dist_remaining < 0.5)
+        {
+          found_path = true;
+          setPath (newNode);
+          return true;
+        }
       }
     }
-    q.pop ();
     
+    q.pop ();
     for (; !newNodes.empty(); newNodes.pop_front ()){
       q.push (newNodes.front ());
     }
@@ -105,16 +120,36 @@ bool Pathfinder::expand ()
   return (num_expansions > 0);
 }
 
+bool Pathfinder::searching ()
+{
+  return working;
+}
+
 bool Pathfinder::done ()
 {
   return found_path;
 }
 
-void Pathfinder::draw ()
+void Pathfinder::setHeuristic (heuristic_type ht)
+{
+  cur_heuristic = ht;
+}
+
+void Pathfinder::drawRoutes ()
 {
   if (root){
     draw (root);
   }
+}
+
+void Pathfinder::drawPath ()
+{
+  list <PathNode*> :: iterator it;
+  glBegin (GL_LINE_STRIP);
+  for (it = path.begin(); it != path.end(); it++){
+    glVertex2f ( (*it)->pos.x, (*it)->pos.y);
+  }
+  glEnd ();
 }
 
 void Pathfinder::draw (PathNode* p)

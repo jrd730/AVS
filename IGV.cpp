@@ -6,7 +6,8 @@ IGV::IGV () :
   cameraMinRange (0.1),
   cameraMaxRange (5.0),
   cameraSpread   (70.0),
-  autonomousMode (false)
+  autonomousMode (false),
+  followingPath (false)
 {
   modelVertices.resize (6);
   modelVertices[0] = vertex (-.325, .325);
@@ -16,7 +17,7 @@ IGV::IGV () :
   modelVertices[4] = vertex ( -.175, -.925);
   modelVertices[5] = vertex ( -.325, -.325);
 
-  pf.set (8, 0.5, 0.3, 0.5);
+  pf.set (8, 0.3, 0.2, 0.5);
 
   setSensorVertices ();
 }
@@ -38,8 +39,36 @@ void IGV::runProgram ()
 
   if (autonomousMode)
   {
-    // setForwardSpeed (1.0);
-    // setRotateSpeed (1.0);
+    // still have goals to reach
+    if (env.waypoints.size () > 0){
+      
+      // a route to a goal has been mapped out already
+      if (followingPath)
+      {
+        // align to next node in the path
+
+        // go forwards
+
+        // check if current node is close enough to move on to next
+      } 
+      
+      // generate a path to a goal
+      else
+      {
+        // start a new path 
+        if ( !pf.searching () ){
+          findPath (env.waypoints[0]);
+        }
+        else{
+          if ( !pf.done () ){
+            pf.expand ();
+          }
+          else{
+            followingPath = true;
+          }
+        }
+      }
+    }
   }
 }
 
@@ -97,6 +126,11 @@ void IGV::setSensorVertices ()
   sensorVertices[2] = 
   vertex ( cameraMaxRange * -sin ((cameraSpread/DEGREES_PER_RADIAN)/2.0), 
             cameraMaxRange * cos ((cameraSpread/DEGREES_PER_RADIAN)/2.0) );
+}
+
+float IGV::angleTo (vertex v)
+{
+
 }
 
 void IGV::draw ()

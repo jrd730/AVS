@@ -72,6 +72,7 @@ class Simulator
     void keyboard(unsigned char, int, int);
     void keyboardUp(unsigned char, int, int);
 
+    static void radioCB (int);
     static void buttonWrapper (int);
     static void specialWrapper (int, int, int);
     static void specialUpWrapper (int, int, int);

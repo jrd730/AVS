@@ -51,7 +51,10 @@ public:
   vector <vertex> sensorVertices; //meters from center
 
   bool autonomousMode; 
+  bool followingPath;
 
   private:
+
+    float angleTo (vertex v);
 
 };

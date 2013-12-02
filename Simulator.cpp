@@ -47,6 +47,7 @@ int drawSelectionBox = 0;
 int drawVisibleLines = 1;
 
 int displayMode = 0;
+int heuristicMode = 0;
 
 GLUI *glui;
 
@@ -108,8 +109,15 @@ static void zoom (double xAmount, double yAmount)
 //   }
 // }
 
-static void editModeCallBack (int val)
+void Simulator::radioCB (int val)
 {
+  switch (val){
+    // heuristic mode modified
+    case 1:
+      cout << "Current Heuristic: " << heuristicMode << endl;
+    break;
+  }
+
   cout << "Radio Callback: " << val << endl;
 }
 
@@ -200,27 +208,28 @@ void Simulator::initGUI ()
   glui = GLUI_Master.create_glui ( "Simulator Parameters", 0, 200, 200);
   GLUI_Master.set_glutIdleFunc(NULL);
   
-  glui->add_checkbox ("Draw Entire Maze", &drawEnv, 1, viewModeCallBack);
-  glui->add_checkbox ("Draw IGV", &drawIGV, 2, viewModeCallBack);
-  glui->add_checkbox ("Draw Visible Region", &drawVisibleLines, 3, viewModeCallBack);
+  glui->add_checkbox ("Display entire maze", &drawEnv, 1, viewModeCallBack);
+  glui->add_checkbox ("Display vehicle LOS", &drawIGV, 2, viewModeCallBack);
+  glui->add_checkbox ("Display vehicle map", &drawVisibleLines, 3, viewModeCallBack);
   
   glui->add_button ("Reset Environment", 1, buttonWrapper);
-  GLUI_Panel *panel = glui->add_panel ("Panel");
-  glui->add_button_to_panel (panel, "Buttons");
-  //glui->add_column_to_panel (panel, true);
-  glui->add_button_to_panel (panel, "Are");
-  //glui->add_column_to_panel (panel, true);
-  glui->add_button_to_panel (panel, "Cool");
+  // glui->add_button_to_panel (panel, "Buttons");
+  // //glui->add_column_to_panel (panel, true);
+  // glui->add_button_to_panel (panel, "Are");
+  // //glui->add_column_to_panel (panel, true);
+  // glui->add_button_to_panel (panel, "Cool");
   
-  GLUI_RadioGroup* displayModeRadio = 
-    glui->add_radiogroup_to_panel (panel, &displayMode, 3, editModeCallBack);
-  
-  GLUI_RadioButton* editMode = 
-    glui->add_radiobutton_to_group (displayModeRadio, "edit map");
-  
-  GLUI_RadioButton* simMode  = 
-    glui->add_radiobutton_to_group (displayModeRadio, "simulate");
-  
+  // GLUI_Panel *panel = glui->add_panel ("Panel");
+  //   GLUI_RadioGroup* displayModeRadio = glui->add_radiogroup_to_panel (panel, &displayMode, 3, editModeCallBack);
+  //     GLUI_RadioButton* editMode = glui->add_radiobutton_to_group (displayModeRadio, "edit map");
+  //     GLUI_RadioButton* simMode  = glui->add_radiobutton_to_group (displayModeRadio, "simulate");
+
+  GLUI_Panel *heuristicPanel = glui->add_panel ("Search Heuristic");
+    GLUI_RadioGroup* heuristicRadio = glui->add_radiogroup_to_panel (heuristicPanel, &heuristicMode, 1, radioCB);
+      GLUI_RadioButton* bfsMode = glui->add_radiobutton_to_group (heuristicRadio, "Breadth First");
+      GLUI_RadioButton* greedyMode = glui->add_radiobutton_to_group (heuristicRadio, "Greedy");
+      GLUI_RadioButton* combinedMode = glui->add_radiobutton_to_group (heuristicRadio, "Combined");
+
   //GLUI_RadioButton 
 }
 
@@ -416,9 +425,17 @@ void Simulator::display()
           glVertex2f (igv.env.lines[i]->start.x, igv.env.lines[i]->start.y);
           glVertex2f (igv.env.lines[i]->next->start.x, igv.env.lines[i]->next->start.y);
         }
+        if (igv.env.lines[i]->prev != NULL)
+        {
+          glVertex2f (igv.env.lines[i]->start.x, igv.env.lines[i]->start.y);
+          glVertex2f (igv.env.lines[i]->prev->start.x, igv.env.lines[i]->prev->start.y);
+        }
       }
       glEnd();
   }
+
+  igv.draw();
+  igv.env.drawWaypoints ();
 
   if (drawIGV){
     for (int i=0; i < igv.visibleLines.size(); ++i){
@@ -428,11 +445,14 @@ void Simulator::display()
         glVertex2f (igv.visibleLines[i]->next->start.x, igv.visibleLines[i]->next->start.y);
       }
     }
-    igv.draw();
-    igv.env.drawWaypoints ();
-
+  
     glColor3f (1, 1, 0);
-    igv.pf.draw ();
+    if (igv.pf.done ()){
+      igv.pf.drawPath ();
+    }
+    else{
+      igv.pf.drawRoutes ();
+    }
   }
 
   glutSwapBuffers();
@@ -453,7 +473,7 @@ void Simulator::reshape(int w, int h)
 
 void Simulator::motion (int x, int y)
 {
-  vertex newpoint ( x*pixToXCoord + graphXMin, -y*pixToYCoord + graphYMax);
+  vertex newpoint ( pix_coord_to_point (x, y) );
 
   if (leftMouseDown){
       if (env.insertEvenSpacedLine (newpoint, minLineGap))
@@ -571,6 +591,7 @@ void Simulator::keyboard(unsigned char key, int x, int y)
         igv.pf.expand ();
       break;
   }
+  cout << igv.autonomousMode << endl;
   //glutPostRedisplay();
 }
 
