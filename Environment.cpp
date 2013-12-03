@@ -126,8 +126,9 @@ void Environment::insertWaypoint (vertex v)
 
 void Environment::drawWaypoints ()
 {
-	for (int i = 0; i < waypoints.size(); ++i){
-		drawWaypoint (waypoints[i]);
+	list <vertex> :: iterator it;
+	for (it = waypoints.begin (); it != waypoints.end(); it++){
+		drawWaypoint (*it);
 	}	
 }
 

@@ -591,7 +591,6 @@ void Simulator::keyboard(unsigned char key, int x, int y)
         igv.pf.expand ();
       break;
   }
-  cout << igv.autonomousMode << endl;
   //glutPostRedisplay();
 }
 

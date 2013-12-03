@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+#include <list>
 #include <vector>
 
 #include "QuadTree.h"
@@ -36,7 +37,7 @@ class Environment
 		QuadTree <Line*>* lineMap;
 
 		vector <Line*> lines;
-		vector <vertex> waypoints;
+		list <vertex> waypoints;
 
 	private:
 

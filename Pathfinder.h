@@ -15,7 +15,7 @@ enum heuristic_type{
   BREADTH_FIRST, GREEDY, COMBINED
 };
 
-static heuristic_type cur_heuristic = COMBINED;
+static heuristic_type cur_heuristic = GREEDY;
 
 class PathNode
 {
@@ -116,6 +116,10 @@ class Pathfinder
     void drawPath ();
 
     void setHeuristic (heuristic_type ht);
+
+    vertex getCurPathNode ();
+
+    bool setNextPathNode ();
 
   private:
 

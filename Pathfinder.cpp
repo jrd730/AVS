@@ -120,6 +120,21 @@ bool Pathfinder::expand ()
   return (num_expansions > 0);
 }
 
+vertex Pathfinder::getCurPathNode ()
+{
+  return path.front ()->pos;
+}
+
+bool Pathfinder::setNextPathNode ()
+{
+  if (path.empty ()) 
+    return false;
+  else{ 
+    path.pop_front ();
+    return true;
+  }
+}
+
 bool Pathfinder::searching ()
 {
   return working;

@@ -57,7 +57,7 @@ void IGV::runProgram ()
       {
         // start a new path 
         if ( !pf.searching () ){
-          findPath (env.waypoints[0]);
+          findPath (env.waypoints.front());
         }
         else{
           if ( !pf.done () ){
