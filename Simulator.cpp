@@ -590,6 +590,10 @@ void Simulator::keyboard(unsigned char key, int x, int y)
       case 'e':
         igv.pf.expand ();
       break;
+
+      case 'g':
+        igv.displayInfo ();
+      break;
   }
   //glutPostRedisplay();
 }

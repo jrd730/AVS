@@ -33,6 +33,8 @@ public:
 
   void draw ();
 	
+  void displayInfo ();
+
   void setSensorVertices ();
   
   double cameraMaxRange; // meters from center
@@ -53,8 +55,10 @@ public:
   bool autonomousMode; 
   bool followingPath;
 
-  private:
+  float angleTo (vertex v);
+  
+  private:  
 
-    float angleTo (vertex v);
+    vertex pathNode;
 
 };

@@ -102,7 +102,7 @@ bool Pathfinder::expand ()
         top->next[i] = newNode;
         num_expansions++;
 
-        if (newNode->dist_remaining < 0.5)
+        if (newNode->dist_remaining < 0.3)
         {
           found_path = true;
           setPath (newNode);
@@ -122,7 +122,9 @@ bool Pathfinder::expand ()
 
 vertex Pathfinder::getCurPathNode ()
 {
-  return path.front ()->pos;
+  if (!path.empty()){
+    return path.front ()->pos;
+  }
 }
 
 bool Pathfinder::setNextPathNode ()
@@ -133,6 +135,11 @@ bool Pathfinder::setNextPathNode ()
     path.pop_front ();
     return true;
   }
+}
+
+bool Pathfinder::endOfPath ()
+{
+  return path.empty();
 }
 
 bool Pathfinder::searching ()

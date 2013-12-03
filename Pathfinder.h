@@ -121,6 +121,10 @@ class Pathfinder
 
     bool setNextPathNode ();
 
+    bool endOfPath ();
+
+    list <PathNode*> path;
+  
   private:
 
     bool canExpand (vertex v);
@@ -128,8 +132,6 @@ class Pathfinder
     void draw (PathNode* p);
 
     PathNode* root;
-
-    list <PathNode*> path;
 
     bool working;
     bool found_path;

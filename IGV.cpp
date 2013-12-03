@@ -17,7 +17,7 @@ IGV::IGV () :
   modelVertices[4] = vertex ( -.175, -.925);
   modelVertices[5] = vertex ( -.325, -.325);
 
-  pf.set (8, 0.3, 0.2, 0.5);
+  pf.set (8, 0.5, 0.2, 0.5);
 
   setSensorVertices ();
 }
@@ -36,20 +36,61 @@ void IGV::findPath (vertex target)
 void IGV::runProgram ()
 {
   addVisibleLinesToMap ();
-
   if (autonomousMode)
   {
+    //cout << "current rotation: " << rotation << endl;
     // still have goals to reach
     if (env.waypoints.size () > 0){
       
       // a route to a goal has been mapped out already
       if (followingPath)
       {
-        // align to next node in the path
-
-        // go forwards
-
+        pathNode = pf.getCurPathNode ();
+        
         // check if current node is close enough to move on to next
+        if (position.distance (pathNode) < 0.5 )
+        {
+          cout << "Reached the next node in the path\n";
+          if (pf.path.size () > 1)
+          {
+            pf.setNextPathNode ();
+            cout << "Setting the next path node\n";
+            cout << "Nodes remaining: " << pf.path.size () << endl;
+            pathNode = pf.getCurPathNode ();
+          } 
+          // reached the end of current path to a waypoint
+          else
+          {
+            cout << "Reached the waypoint, going on to the next\n";
+            fullStop ();
+            pf.clear ();
+            env.waypoints.pop_front();
+            followingPath = false;
+          }
+        }
+
+        else{
+          // align to next node in the path
+          float theta = angleTo (pathNode);
+
+          //cout << "angle to next node: " << theta << endl;
+            
+          // angle is close enough go forwards
+          if ( theta <= 5.0 || theta >= 355.0 ){
+            setRotateSpeed (0);
+            setForwardSpeed (1.0);
+          }
+          // turn left 
+          else if (theta < 180.0){
+            setRotateSpeed (2.0);
+            setForwardSpeed (0);
+          }
+          // turn right
+          else {
+            setRotateSpeed (-2.0);
+            setForwardSpeed (0);
+          }
+        }     
       } 
       
       // generate a path to a goal
@@ -130,7 +171,19 @@ void IGV::setSensorVertices ()
 
 float IGV::angleTo (vertex v)
 {
+  float theta = position.angleTo (v) - 90.0 - rotation;
+  while (theta < 0){
+    theta += 360.0;
+  }
+  return theta;
+}
 
+void IGV::displayInfo ()
+{
+  cout << "Position: " << position << endl;
+  cout << "Rotation: " << rotation << endl;
+  cout << "Forward Speed: " << fwdSpd << endl;
+  cout << "Rotate Speed: " << rteSpd << endl; 
 }
 
 void IGV::draw ()
