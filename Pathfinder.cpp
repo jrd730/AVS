@@ -33,12 +33,16 @@ void Pathfinder::clear ()
 
 void Pathfinder::set (int div, float rad, float cd, float wb, float nb)
 {
-  divisions = div;
   radius = rad;
   crowded_dist = cd;
   wall_buf = wb;
   node_buf = nb;
+  setDivisions (div);
+}
 
+void Pathfinder::setDivisions (int d)
+{
+  divisions = d;
   float theta = 360.0 / (float)divisions;
   v.resize (divisions);
   
@@ -46,6 +50,51 @@ void Pathfinder::set (int div, float rad, float cd, float wb, float nb)
     v[i].x = radius * cos ( (theta*i)/DEGREES_PER_RADIAN );
     v[i].y = radius * sin ( (theta*i)/DEGREES_PER_RADIAN );
   }
+}
+  
+void Pathfinder::setRadius (float r)
+{
+  radius = r;
+}
+
+void Pathfinder::setCrowdDistance (float cd)
+{
+  crowded_dist = cd;
+}
+
+void Pathfinder::setWallDistance (float wb)
+{
+  wall_buf = wb;
+}
+
+void Pathfinder::setGoalDistance (float nb)
+{
+  node_buf = nb;
+}
+
+float Pathfinder::getDivisions ()
+{
+  return divisions;
+}
+    
+float Pathfinder::getRadius ()
+{
+  return radius;  
+}
+
+float Pathfinder::getCrowdDistance ()
+{
+  return crowded_dist;
+}
+
+float Pathfinder::getWallDistance ()
+{
+  return wall_buf;
+}
+
+float Pathfinder::getGoalDistance ()
+{
+  return node_buf;
 }
 
 void Pathfinder::begin (QuadTree <Line*>* w, vertex s, vertex e)

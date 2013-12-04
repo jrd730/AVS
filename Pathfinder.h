@@ -15,7 +15,7 @@ enum heuristic_type{
   BREADTH_FIRST, GREEDY, COMBINED
 };
 
-static heuristic_type cur_heuristic = COMBINED;
+static heuristic_type cur_heuristic = BREADTH_FIRST;
 
 class PathNode
 {
@@ -99,7 +99,27 @@ class Pathfinder
 
     void clear ();
 
-    void set (int divisions, float radius, float crowded_dist, float wall_buf, float node_buf); 
+    void set (int divisions, float radius, float crowded_dist, float wall_buf, float node_buf);
+    
+    void setDivisions (int divisions);
+    
+    void setRadius (float radius);
+    
+    void setCrowdDistance (float crowded_dist);
+    
+    void setWallDistance (float wall_buf);
+    
+    void setGoalDistance (float node_buf);
+
+    float getDivisions ();
+    
+    float getRadius ();
+    
+    float getCrowdDistance ();
+    
+    float getWallDistance ();
+    
+    float getGoalDistance ();
 
     void begin ( QuadTree <Line*>* w, vertex s, vertex e);
 
@@ -158,5 +178,7 @@ class Pathfinder
 
     vertex start;
     vertex end;
+    vertex minXY;
+    vertex maxXY;
 
 };

@@ -15,7 +15,7 @@ IGV::IGV () :
   modelVertices[4] = vertex ( -.175, -.925);
   modelVertices[5] = vertex ( -.325, -.325);
 
-  pf.set (24, 0.3, 0.2, 1.25, 0.5);
+  pf.set (8, 0.5, 0.3, 1.25, 0.5);
 
   setSensorVertices ();
 }
@@ -80,7 +80,8 @@ void IGV::runProgram ()
 
           // check for a potential collision, if one might occur then the 
           // current path should be abandoned and a new one should be formed
-          vector <pair <vertex, Line*> > closeWalls = env.lineMap->getObjectsInRegion (pathNode - 1.0, pathNode + 1.0);
+          vector <pair <vertex, Line*> > closeWalls = env.lineMap->getObjectsInRegion (pathNode - pf.getWallDistance (), pathNode + pf.getWallDistance () );
+          
           if (closeWalls.size () > 0){
             fullStop ();
             pf.clear ();
@@ -92,12 +93,19 @@ void IGV::runProgram ()
           // as well as the distance to the next node
           // turn left 
           if (theta < 180.0){
-            setRotateSpeed (1.0);
-            setForwardSpeed ( max ( 0.0, cos (theta/DEGREES_PER_RADIAN) ) );
+            setRotateSpeed (2.0);
+            //setForwardSpeed (0);
+            setForwardSpeed ( max ( 0.0, cos (theta/DEGREES_PER_RADIAN)/3.0 ) );
           }
           // turn right
           else {
-            setRotateSpeed (-1.0);
+            setRotateSpeed (-2.0);
+            //setForwardSpeed (0);
+            setForwardSpeed ( max ( 0.0, cos (theta/DEGREES_PER_RADIAN)/3.0 ) );
+          }
+
+          if (theta <= 30.0 || theta >= 330.0){
+            setRotateSpeed (rteSpd/2.0);
             setForwardSpeed ( max ( 0.0, cos (theta/DEGREES_PER_RADIAN) ) );
           }
         }     
@@ -119,6 +127,7 @@ void IGV::runProgram ()
             if (pf.pathImpossible ()){
               pf.clear ();
               env.waypoints.pop_front();
+              cout << "Mission impossible~\n";
             }
           }
           else{

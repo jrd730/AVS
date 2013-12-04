@@ -26,32 +26,29 @@ enum ARROW_ID {
 
 class Simulator
 {
-	public:
+public:
 
-		Simulator (int argc,char** arg);
-		~Simulator ();
+	Simulator (int argc,char** arg);
+	~Simulator ();
 
-		void init (int argc, char** argv);
+	void init (int argc, char** argv);
     void reset ();
-		void run ();
+	void run ();
 
-	private:
+private:
 
-		Environment env;
-		IGV igv;
+	Environment env;
+	IGV igv;
 
-		static Simulator* callbackInstance;
+	static Simulator* callbackInstance;
 
+    void initGlut (int argc, char** argv);
     void initGUI ();
 
-    void buttonPressed (int button);
-
     void saveEnvironment ();
-    
     void loadEnvironment ();
 
     void updateIGV ();
-    
     void setVisibleLines ();
     
     bool pointInCircleSlice (
@@ -59,8 +56,6 @@ class Simulator
       float minRad, float maxRad, 
       float minTheta, float maxTheta
     );
-
-    //void updateCamera ();
 
     void special (int, int, int);
     void specialUp (int, int, int);
@@ -73,6 +68,9 @@ class Simulator
     void keyboardUp(unsigned char, int, int);
 
     static void radioCB (int);
+    static void buttonCB (int);
+    static void intBoxCB (int);
+    static void floatBoxCB (int);
     static void buttonWrapper (int);
     static void specialWrapper (int, int, int);
     static void specialUpWrapper (int, int, int);

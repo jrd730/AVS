@@ -6,6 +6,7 @@ A differential drive vehicle is a vehicle with independent motion of its left an
 the ratio of angular velocities of each wheel. 
 */
 #pragma once
+#include <algorithm>
 #include <cmath>
 #include "Vertex.h"
 #define DEGREES_PER_RADIAN 57.2957795

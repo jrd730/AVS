@@ -5,13 +5,13 @@ static int width = 960;
 static double ZOOM_INC = 128.0;
 static double PAN_INC = 128.0;
 
-static float graphXMin = -9;
-static float graphXMax = 9;
+static float graphXMin = -16;
+static float graphXMax = 16;
 static float graphXRange = graphXMax - graphXMin;
 static float pixToXCoord = graphXRange/width;
 
-static float graphYMin = -9;
-static float graphYMax = 9;
+static float graphYMin = -16;
+static float graphYMax = 16;
 static float graphYRange = graphYMax - graphYMin;
 static float pixToYCoord = graphYRange/height;
 
@@ -33,6 +33,11 @@ static double minLineGap = 0.1;
 
 static int gl_window_id;
 static int gui_window_id;
+static float glui_radius = 0;
+static float glui_wall_distance = 0;
+static float glui_crowd_distance = 0;
+static float glui_goal_distance = 0;
+static int glui_divisions = 0;
 
 bool keyMask [255];
 bool arrowKeys [4];
@@ -95,20 +100,39 @@ void Simulator::radioCB (int val)
   switch (val){
     // heuristic mode modified
     case 1:
-      cout << "Current Heuristic: " << heuristicMode << endl;
+      callbackInstance->igv.pf.setHeuristic ((heuristic_type) heuristicMode );
     break;
   }
-
-  cout << "Radio Callback: " << val << endl;
 }
 
-static void viewModeCallBack (int val)
+void Simulator::intBoxCB (int val)
 {
   switch (val){
     case 1:
+      callbackInstance->igv.pf.setDivisions (glui_divisions);
     break;
   }
-  cout << "value of drawEnv: " << drawEnv << endl;
+}
+
+void Simulator::floatBoxCB (int val)
+{
+  switch (val){
+    case 1:
+      callbackInstance->igv.pf.setRadius (glui_radius);
+    break;
+
+    case 2:
+      callbackInstance->igv.pf.setWallDistance (glui_wall_distance);
+    break;
+
+    case 3:
+      callbackInstance->igv.pf.setCrowdDistance (glui_crowd_distance);
+    break;
+    
+    case 4:
+      callbackInstance->igv.pf.setGoalDistance (glui_goal_distance);
+    break;
+  }
 }
 
 static void updateCamera (int val)
@@ -141,20 +165,12 @@ Simulator::Simulator (int argc, char** argv)
 {
   //qtree = new QuadTree <int> (origin, axis, 1, 26);
 	init (argc, argv);
+  initGUI ();
 }
 
 Simulator::~Simulator ()
 {
 
-}
-
-
-void Simulator::reset ()
-{
-  igv.visibleLines.clear ();
-  igv.env.clear ();
-  igv.pf.clear ();
-  env.destroy ();
 }
 
 void Simulator::init (int argc, char** argv)
@@ -176,48 +192,49 @@ void Simulator::init (int argc, char** argv)
   GLUI_Master.set_glutSpecialFunc(specialWrapper);
   glutSpecialUpFunc(specialUpWrapper);
   fill(keyMask, keyMask+255, 0);
-
-  initGUI ();
 }
 
 void Simulator::initGUI ()
 {
-  //gui_window_id = glutCreateWindow("Simulator Parameters");
-  glui = GLUI_Master.create_glui ( "Simulator Parameters", 0, 200, 200);
+  glui = GLUI_Master.create_glui ( "Settings", 0, 200, 200);
   GLUI_Master.set_glutIdleFunc(NULL);
   
-  glui->add_checkbox ("Display entire maze", &drawEnv, 1, viewModeCallBack);
-  glui->add_checkbox ("Display vehicle LOS", &drawIGV, 2, viewModeCallBack);
-  glui->add_checkbox ("Display vehicle map", &drawVisibleLines, 3, viewModeCallBack);
+  glui->add_checkbox ("Display entire maze", &drawEnv, 1);
+  glui->add_checkbox ("Display vehicle LOS", &drawIGV, 2);
+  glui->add_checkbox ("Display vehicle map", &drawVisibleLines, 3);
   
-  glui->add_button ("Reset Environment", 1, buttonWrapper);
-  // glui->add_button_to_panel (panel, "Buttons");
-  // //glui->add_column_to_panel (panel, true);
-  // glui->add_button_to_panel (panel, "Are");
-  // //glui->add_column_to_panel (panel, true);
-  // glui->add_button_to_panel (panel, "Cool");
-  
-  // GLUI_Panel *panel = glui->add_panel ("Panel");
-  //   GLUI_RadioGroup* displayModeRadio = glui->add_radiogroup_to_panel (panel, &displayMode, 3, editModeCallBack);
-  //     GLUI_RadioButton* editMode = glui->add_radiobutton_to_group (displayModeRadio, "edit map");
-  //     GLUI_RadioButton* simMode  = glui->add_radiobutton_to_group (displayModeRadio, "simulate");
+  glui->add_button ("Reset Environment", 1, buttonCB);
 
   GLUI_Panel *heuristicPanel = glui->add_panel ("Search Heuristic");
     GLUI_RadioGroup* heuristicRadio = glui->add_radiogroup_to_panel (heuristicPanel, &heuristicMode, 1, radioCB);
-      GLUI_RadioButton* bfsMode = glui->add_radiobutton_to_group (heuristicRadio, "Breadth First");
-      GLUI_RadioButton* greedyMode = glui->add_radiobutton_to_group (heuristicRadio, "Greedy");
-      GLUI_RadioButton* combinedMode = glui->add_radiobutton_to_group (heuristicRadio, "Combined");
+      glui->add_radiobutton_to_group (heuristicRadio, "Breadth First");
+      glui->add_radiobutton_to_group (heuristicRadio, "Greedy");
+      glui->add_radiobutton_to_group (heuristicRadio, "Combined");
 
-  //GLUI_RadioButton 
+  glui->add_edittext ( "# Directions: ", GLUI_EDITTEXT_INT , &glui_divisions, 1, intBoxCB );
+
+  glui->add_edittext ( "Radius: ", GLUI_EDITTEXT_FLOAT , &glui_radius, 1, floatBoxCB );
+  glui->add_edittext ( "Min Wall Distance: ", GLUI_EDITTEXT_FLOAT , &glui_wall_distance, 2, floatBoxCB );
+  glui->add_edittext ( "Min Crowd Distance: ", GLUI_EDITTEXT_FLOAT , &glui_crowd_distance, 3, floatBoxCB );
+  glui->add_edittext ( "Min Goal Distance: ", GLUI_EDITTEXT_FLOAT , &glui_goal_distance, 4, floatBoxCB );
 }
 
-void Simulator::buttonPressed (int button)
+void Simulator::buttonCB (int button)
 {
   switch (button){
     case 1:
-      reset ();
+      callbackInstance->reset ();
     break;
   }
+}
+
+void Simulator::reset ()
+{
+  igv.visibleLines.clear ();
+  igv.env.clear ();
+  igv.pf.clear ();
+  igv.fullStop ();
+  env.destroy ();
 }
 
 void Simulator::saveEnvironment ()
@@ -583,10 +600,6 @@ void Simulator::specialUp (int key, int x, int y)
       arrowKeys[ARROW_RIGHT] = false;
     break;
   }
-}
-
-void Simulator::buttonWrapper (int button){
-  callbackInstance->buttonPressed (button);
 }
 
 void Simulator::specialWrapper (int key, int x, int y){

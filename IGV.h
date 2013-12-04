@@ -5,10 +5,14 @@ An intelligent ground vehicle is like a regular vehicle but with a brain and the
 #include <algorithm>
 #include "DDV.h"
 #include "Environment.h"
-#include "NavMesh.h"
 #include "Pathfinder.h"
 #include "QuadTree.h"
 
+struct region
+{
+  vertex minXY;
+  vertex maxXY;
+}; 
 
 class IGV : public DDV
 {
@@ -25,11 +29,9 @@ public:
   double getCameraSpread ();
 
   void setVisibleLines (vector <Line*>& lines);
-
   void addVisibleLinesToMap ();
 
   void findPath (vertex target);
-
   void clearPath ();
 
 	void runProgram ();
@@ -40,20 +42,17 @@ public:
 
   void setSensorVertices ();
   
-  double cameraMaxRange; // meters from center
-  double cameraMinRange; // meters from center
-  double cameraSpread; // degrees
+  double cameraMaxRange;
+  double cameraMinRange; 
+  double cameraSpread; 
   
   vector <Line*> visibleLines;
 
   Environment  env;
   Pathfinder pf;
 
-  NavMesh paths;
-  //QuadTree <int>* knownObstacles;
-
-  vector <vertex> modelVertices; //meters from center
-  vector <vertex> sensorVertices; //meters from center
+  vector <vertex> modelVertices; 
+  vector <vertex> sensorVertices; 
 
   bool autonomousMode; 
   bool followingPath;
@@ -61,7 +60,7 @@ public:
   float angleTo (vertex v);
   
   private:  
-
+    region explored;
     vertex pathNode;
 
 };
