@@ -18,9 +18,6 @@ static float pixToYCoord = graphYRange/height;
 static bool leftMouseDown = 0;
 static bool rightMouseDown = 0;
 
-static vertex squareCenter (0, 0);
-static vertex squareRange (4, 4);
-
 static vertex origin (0, 0);
 static vertex axis (128.0, 128.0);
 
@@ -30,7 +27,6 @@ static vector <Line*> visibleLines;
 static vector <vertex> visiblePoints;
 
 static int bucketSize = 1;
-//static QuadTree <int>* qtree;
 static bool drawQuadTree = 0;
 
 static double minLineGap = 0.1;
@@ -94,21 +90,6 @@ static void zoom (double xAmount, double yAmount)
     glLoadIdentity();   
 }
 
-// static void findPoints ()
-// {
-//   vector <pair <vertex, int> > found;
-//   found = qtree->getObjectsInRegion (
-//       {squareCenter.x-squareRange.x, squareCenter.y-squareRange.y}, 
-//       {squareCenter.x+squareRange.x, squareCenter.y+squareRange.y});
-
-//   foundPoint.clear();
-//   foundPoint.resize(found.size());
-
-//   for (int i=0; i < found.size(); ++i){
-//       foundPoint[i] = found[i].first;
-//   }
-// }
-
 void Simulator::radioCB (int val)
 {
   switch (val){
@@ -171,8 +152,8 @@ Simulator::~Simulator ()
 void Simulator::reset ()
 {
   igv.visibleLines.clear ();
-  //igv.env.destroy ();
   igv.env.clear ();
+  igv.pf.clear ();
   env.destroy ();
 }
 
@@ -182,15 +163,12 @@ void Simulator::init (int argc, char** argv)
   glutInitDisplayMode( GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
   glutInitWindowSize (width, height);
   gl_window_id = glutCreateWindow ("Autonomous Vehicle Simulator");
-  //glutSetWindowTitle("");
-  //glutSetIconTitle("");
   glEnable( GL_DEPTH_TEST );
   glClearColor(0, 0, 0, 0);
 
   glutMotionFunc (motionWrapper);
   GLUI_Master.set_glutMouseFunc (mouseWrapper);
   glutTimerFunc (16, timerWrapper, 0);
-  //glutTimerFunc (40, updateCamera, 0);
   glutDisplayFunc(displayWrapper);
   GLUI_Master.set_glutReshapeFunc(reshapeWrapper);
   GLUI_Master.set_glutKeyboardFunc(keyboardWrapper);
@@ -370,8 +348,6 @@ void Simulator::timer (int val)
   updateCamera (val);
   glutPostRedisplay ();
   glui->sync_live();
-
-  //cout << "value of drawEnv: " << drawEnv << endl;
 	glutTimerFunc (18, timerWrapper, 0);
 }
 
@@ -384,35 +360,8 @@ void Simulator::display()
     env.drawLineQuadTree ();
   }
 
-  // glColor3f (0, 0, 1);
-  // glPointSize (3.0);
-  // glBegin (GL_POINTS);
-  //     for (unsigned i=0; i<targetPoint.size(); ++i){
-  //         glVertex2f (targetPoint[i].x, targetPoint[i].y);
-  //     }
-  // glEnd();
-
   if (drawEnv){
     env.drawLineSegments ();
-  }
-
-  if (drawSelectionBox){
-    glColor3f (0, 1, 0);
-      glBegin (GL_LINE_LOOP);
-          glVertex2f (squareCenter.x-squareRange.x, squareCenter.y-squareRange.y);
-          glVertex2f (squareCenter.x-squareRange.x, squareCenter.y+squareRange.y);
-          glVertex2f (squareCenter.x+squareRange.x, squareCenter.y+squareRange.y);
-          glVertex2f (squareCenter.x+squareRange.x, squareCenter.y-squareRange.y);
-      glEnd();
-
-    // found points 
-    glColor3f (0, 1, 0);
-    glPointSize (3.0);
-    glBegin (GL_POINTS);
-        for (unsigned i=0; i<foundPoint.size(); ++i){
-            glVertex2f (foundPoint[i].x, foundPoint[i].y);
-        }
-    glEnd();
   }
 
   if (drawVisibleLines){
@@ -476,17 +425,13 @@ void Simulator::motion (int x, int y)
   vertex newpoint ( pix_coord_to_point (x, y) );
 
   if (leftMouseDown){
-      if (env.insertEvenSpacedLine (newpoint, minLineGap))
-      {
+      if (env.insertEvenSpacedLine (newpoint, minLineGap)){
         targetPoint.push_back(newpoint);
       }
     }
     else if (rightMouseDown){
-      squareCenter = newpoint;
-      //findPoints ();
+
     }
-    
-    //glutPostRedisplay();
 }
 
 void Simulator::mouse (int button, int state, int x, int y)
@@ -512,11 +457,7 @@ void Simulator::mouse (int button, int state, int x, int y)
         switch (state){
           case GLUT_DOWN:
             rightMouseDown = 1;
-            squareCenter = newpoint;
-            //findPoints ();
-
             igv.env.insertWaypoint (newpoint);
-
           break;
 
           case GLUT_UP:
@@ -525,14 +466,12 @@ void Simulator::mouse (int button, int state, int x, int y)
         }
       break;
     }
-    //glutPostRedisplay();
 }
 
 
 
 void Simulator::keyboard(unsigned char key, int x, int y)
 {
-  //cout << key << " pressed\n";
   keyMask[key] = true;
 	switch (key){
       case 'k':
@@ -574,12 +513,14 @@ void Simulator::keyboard(unsigned char key, int x, int y)
       break;
 
       case 'f':
-        //findPoints ();
       break;
 
       case 'r':
         igv.autonomousMode = !igv.autonomousMode;
-        if (!igv.autonomousMode) igv.fullStop ();
+        if (!igv.autonomousMode) {
+          igv.fullStop ();
+          igv.clearPath ();
+        }
       break;
 
       case 't':
@@ -595,7 +536,6 @@ void Simulator::keyboard(unsigned char key, int x, int y)
         igv.displayInfo ();
       break;
   }
-  //glutPostRedisplay();
 }
 
 void Simulator::keyboardUp(unsigned char key, int x, int y)

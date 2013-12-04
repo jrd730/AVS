@@ -1,7 +1,5 @@
 #include "IGV.h"
 
-static double base_speed = .01;
-
 IGV::IGV () :
   cameraMinRange (0.1),
   cameraMaxRange (5.0),
@@ -17,7 +15,7 @@ IGV::IGV () :
   modelVertices[4] = vertex ( -.175, -.925);
   modelVertices[5] = vertex ( -.325, -.325);
 
-  pf.set (8, 0.5, 0.2, 0.5);
+  pf.set (24, 0.3, 0.2, 1.25, 0.5);
 
   setSensorVertices ();
 }
@@ -30,7 +28,11 @@ IGV::~IGV ()
 void IGV::findPath (vertex target)
 {
   pf.begin (env.lineMap, position, target);
-  //while (pf.expand () && !pf.done ());
+}
+
+void IGV::clearPath ()
+{
+  pf.clear ();
 }
 
 void IGV::runProgram ()
@@ -48,7 +50,8 @@ void IGV::runProgram ()
         pathNode = pf.getCurPathNode ();
         
         // check if current node is close enough to move on to next
-        if (position.distance (pathNode) < 0.5 )
+        float dist_to_node = position.distance (pathNode);
+        if (dist_to_node < 0.5 )
         {
           cout << "Reached the next node in the path\n";
           if (pf.path.size () > 1)
@@ -56,7 +59,7 @@ void IGV::runProgram ()
             pf.setNextPathNode ();
             cout << "Setting the next path node\n";
             cout << "Nodes remaining: " << pf.path.size () << endl;
-            pathNode = pf.getCurPathNode ();
+            //pathNode = pf.getCurPathNode ();
           } 
           // reached the end of current path to a waypoint
           else
@@ -74,21 +77,28 @@ void IGV::runProgram ()
           float theta = angleTo (pathNode);
 
           //cout << "angle to next node: " << theta << endl;
-            
-          // angle is close enough go forwards
-          if ( theta <= 5.0 || theta >= 355.0 ){
-            setRotateSpeed (0);
-            setForwardSpeed (1.0);
+
+          // check for a potential collision, if one might occur then the 
+          // current path should be abandoned and a new one should be formed
+          vector <pair <vertex, Line*> > closeWalls = env.lineMap->getObjectsInRegion (pathNode - 1.0, pathNode + 1.0);
+          if (closeWalls.size () > 0){
+            fullStop ();
+            pf.clear ();
+            followingPath = false;
+            return;
           }
+
+          // set a forward speed that is related to the angle to the next node
+          // as well as the distance to the next node
           // turn left 
-          else if (theta < 180.0){
-            setRotateSpeed (2.0);
-            setForwardSpeed (0);
+          if (theta < 180.0){
+            setRotateSpeed (1.0);
+            setForwardSpeed ( max ( 0.0, cos (theta/DEGREES_PER_RADIAN) ) );
           }
           // turn right
           else {
-            setRotateSpeed (-2.0);
-            setForwardSpeed (0);
+            setRotateSpeed (-1.0);
+            setForwardSpeed ( max ( 0.0, cos (theta/DEGREES_PER_RADIAN) ) );
           }
         }     
       } 
@@ -100,9 +110,16 @@ void IGV::runProgram ()
         if ( !pf.searching () ){
           findPath (env.waypoints.front());
         }
+
+        // continue expanding on path search until a path is found or the 
+        // specified waypoint is determined to be unreachable
         else{
           if ( !pf.done () ){
             pf.expand ();
+            if (pf.pathImpossible ()){
+              pf.clear ();
+              env.waypoints.pop_front();
+            }
           }
           else{
             followingPath = true;

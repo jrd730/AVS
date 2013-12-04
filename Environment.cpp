@@ -50,6 +50,8 @@ void Environment::clear ()
 	lines.clear ();
 	lineStarts.clear();
 
+	waypoints.clear ();
+
 	curLine = NULL;
 }
 

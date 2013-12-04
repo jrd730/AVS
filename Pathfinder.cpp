@@ -6,9 +6,11 @@ static vertex axis (128.0, 128.0);
 Pathfinder::Pathfinder ()
 {
   found_path = false;
+  impossible = false;
   working = false;
   root = NULL;
   max_expansions = 100;
+  visited = NULL;
 }
 
 Pathfinder::~Pathfinder ()
@@ -29,12 +31,13 @@ void Pathfinder::clear ()
   working = false;
 }
 
-void Pathfinder::set (int div, float rad, float cd, float wb)
+void Pathfinder::set (int div, float rad, float cd, float wb, float nb)
 {
   divisions = div;
   radius = rad;
   crowded_dist = cd;
   wall_buf = wb;
+  node_buf = nb;
 
   float theta = 360.0 / (float)divisions;
   v.resize (divisions);
@@ -48,6 +51,7 @@ void Pathfinder::set (int div, float rad, float cd, float wb)
 void Pathfinder::begin (QuadTree <Line*>* w, vertex s, vertex e)
 {
   found_path = false;
+  impossible = false;
   working = true;
   walls = w;
   start = s;
@@ -55,6 +59,9 @@ void Pathfinder::begin (QuadTree <Line*>* w, vertex s, vertex e)
   root = new PathNode (s, NULL, divisions);
   q.push (root);
 
+  if (visited != NULL){
+    delete visited;
+  }
   visited =  new QuadTree <PathNode*> (origin, axis, 1, 26);
 }
 
@@ -102,7 +109,7 @@ bool Pathfinder::expand ()
         top->next[i] = newNode;
         num_expansions++;
 
-        if (newNode->dist_remaining < 0.3)
+        if (newNode->dist_remaining < node_buf)
         {
           found_path = true;
           setPath (newNode);
@@ -115,6 +122,10 @@ bool Pathfinder::expand ()
     for (; !newNodes.empty(); newNodes.pop_front ()){
       q.push (newNodes.front ());
     }
+  }
+
+  if (q.empty () && !found_path){
+    impossible = true;
   }
 
   return (num_expansions > 0);
@@ -135,6 +146,11 @@ bool Pathfinder::setNextPathNode ()
     path.pop_front ();
     return true;
   }
+}
+
+bool Pathfinder::pathImpossible ()
+{
+  return impossible;
 }
 
 bool Pathfinder::endOfPath ()
