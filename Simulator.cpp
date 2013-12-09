@@ -1,7 +1,7 @@
 #include "Simulator.h"
 
-static int height = 960;
-static int width = 960;
+static int height = 640;
+static int width = 640;
 static double ZOOM_INC = 128.0;
 static double PAN_INC = 128.0;
 

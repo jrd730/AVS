@@ -15,7 +15,7 @@ IGV::IGV () :
   modelVertices[4] = vertex ( -.175, -.925);
   modelVertices[5] = vertex ( -.325, -.325);
 
-  pf.set (8, 0.5, 0.3, 1.25, 0.5);
+  pf.set (8, 0.9, 0.5, 1.0, 0.75);
 
   setSensorVertices ();
 }
@@ -51,20 +51,20 @@ void IGV::runProgram ()
         
         // check if current node is close enough to move on to next
         float dist_to_node = position.distance (pathNode);
-        if (dist_to_node < 0.5 )
+        if (dist_to_node < pf.getGoalDistance () )
         {
-          cout << "Reached the next node in the path\n";
+          // cout << "Reached the next node in the path\n";
           if (pf.path.size () > 1)
           {
             pf.setNextPathNode ();
-            cout << "Setting the next path node\n";
-            cout << "Nodes remaining: " << pf.path.size () << endl;
+            // cout << "Setting the next path node\n";
+            // cout << "Nodes remaining: " << pf.path.size () << endl;
             //pathNode = pf.getCurPathNode ();
           } 
           // reached the end of current path to a waypoint
           else
           {
-            cout << "Reached the waypoint, going on to the next\n";
+            // cout << "Reached the waypoint, going on to the next\n";
             fullStop ();
             pf.clear ();
             env.waypoints.pop_front();
@@ -91,8 +91,12 @@ void IGV::runProgram ()
 
           // set a forward speed that is related to the angle to the next node
           // as well as the distance to the next node
-          // turn left 
-          if (theta < 180.0){
+          if (theta <= 45.0 || theta >= 315.0){
+            setRotateSpeed (0);
+            setForwardSpeed ( max ( 0.0, cos (theta/DEGREES_PER_RADIAN) ) );
+          }
+          // turn left
+          else if (theta < 180.0){
             setRotateSpeed (2.0);
             //setForwardSpeed (0);
             setForwardSpeed ( max ( 0.0, cos (theta/DEGREES_PER_RADIAN)/3.0 ) );
@@ -104,10 +108,7 @@ void IGV::runProgram ()
             setForwardSpeed ( max ( 0.0, cos (theta/DEGREES_PER_RADIAN)/3.0 ) );
           }
 
-          if (theta <= 30.0 || theta >= 330.0){
-            setRotateSpeed (rteSpd/2.0);
-            setForwardSpeed ( max ( 0.0, cos (theta/DEGREES_PER_RADIAN) ) );
-          }
+          
         }     
       } 
       
@@ -127,7 +128,7 @@ void IGV::runProgram ()
             if (pf.pathImpossible ()){
               pf.clear ();
               env.waypoints.pop_front();
-              cout << "Mission impossible~\n";
+              //cout << "Mission impossible~\n";
             }
           }
           else{
