@@ -210,6 +210,7 @@ void Simulator::initGUI ()
       glui->add_radiobutton_to_group (heuristicRadio, "Breadth First");
       glui->add_radiobutton_to_group (heuristicRadio, "Greedy");
       glui->add_radiobutton_to_group (heuristicRadio, "Combined");
+      glui->add_radiobutton_to_group (heuristicRadio, "A Star");
 
   glui->add_edittext ( "# Directions: ", GLUI_EDITTEXT_INT , &glui_divisions, 1, intBoxCB );
 
@@ -509,7 +510,7 @@ void Simulator::keyboard(unsigned char key, int x, int y)
       case 'I':
         drawIGV = !drawIGV;
       break;
-
+      
       case 'u':
       case 'U':
         drawEnv = !drawEnv;

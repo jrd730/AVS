@@ -12,7 +12,7 @@
 using namespace std;
 
 enum heuristic_type{
-  BREADTH_FIRST, GREEDY, COMBINED
+  BREADTH_FIRST, GREEDY, COMBINED, ASTAR
 };
 
 static heuristic_type cur_heuristic = BREADTH_FIRST;
@@ -44,7 +44,7 @@ public:
   }
 
   // weight is the combined heuristic value for choosing which nodes to expand 
-  void setWeight ()
+  void setWeight (const vertex& start, const vertex& end)
   {
     switch (cur_heuristic)
     {
@@ -65,6 +65,14 @@ public:
       // runs faster than BFS and with better results than greedy
       case COMBINED:
       weight = 0.5 * pow (dist_to, 2) + dist_remaining;
+      break;
+
+      // prioritize path nodes that lie in the bounding box formed by 
+      // the start and end points
+      case ASTAR:
+      weight = dist_to - 100.0 * float ( 
+        (start.x - end.x < 0) == (start.x-pos.x < 0) && 
+        (start.y - end.y < 0) == (start.y-pos.y < 0));     
       break;
     }
   }

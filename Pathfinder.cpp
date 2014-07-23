@@ -150,7 +150,7 @@ bool Pathfinder::expand ()
         
         newNode->dist_to = top->dist_to + radius;
         newNode->dist_remaining = expansionPoint.distance (end);
-        newNode->setWeight ();
+        newNode->setWeight (start, end);
         
         visited->insert (expansionPoint, newNode);
         newNodes.push_back (newNode);

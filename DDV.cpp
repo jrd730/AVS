@@ -62,6 +62,6 @@ void DDV::fullStop ()
 
 void DDV::updatePosition ()
 {
-  forward (fwdSpd * BASE_FORWARD_SPEED);
   rotate (rteSpd * BASE_ROTATE_SPEED);
+  forward (fwdSpd * BASE_FORWARD_SPEED);
 }

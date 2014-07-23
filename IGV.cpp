@@ -91,8 +91,12 @@ void IGV::runProgram ()
 
           // set a forward speed that is related to the angle to the next node
           // as well as the distance to the next node
-          if (theta <= 45.0 || theta >= 315.0){
-            setRotateSpeed (0);
+          if (theta <= 45.0){
+            setRotateSpeed ( max ( 0.0, sin (theta/DEGREES_PER_RADIAN) ) );
+            setForwardSpeed ( max ( 0.0, cos (theta/DEGREES_PER_RADIAN) ) );
+          }
+          else if (theta >= 315.0){
+            setRotateSpeed ( max ( 0.0, -sin (theta/DEGREES_PER_RADIAN) ) );
             setForwardSpeed ( max ( 0.0, cos (theta/DEGREES_PER_RADIAN) ) );
           }
           // turn left
